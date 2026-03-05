@@ -18,10 +18,10 @@ interface Message {
 
 interface IntakeChatProps {
   projectId: string
-  onComplete: (prd: any) => void
+  onComplete?: (prd: any) => void
 }
 
-export default function IntakeChat({ projectId, onComplete }: IntakeChatProps) {
+export function IntakeChat({ projectId, onComplete }: IntakeChatProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
@@ -101,7 +101,7 @@ export default function IntakeChat({ projectId, onComplete }: IntakeChatProps) {
       setMessages(prev => [...prev, agentMessage])
 
       // Se intake completo, callback
-      if (data.isComplete && data.prd) {
+      if (data.isComplete && data.prd && onComplete) {
         onComplete(data.prd)
       }
     } catch (error) {
@@ -137,19 +137,19 @@ export default function IntakeChat({ projectId, onComplete }: IntakeChatProps) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[--bg-surface] rounded-2xl border border-[--border-bright] overflow-hidden">
+    <div className="flex flex-col h-full glass-card overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-[--border] bg-[--bg-raised]/50 backdrop-blur-sm">
+      <div className="px-6 py-4 border-b border-base-lighter bg-base-light/50 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[--phase-intake] to-[--phase-plan] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent-primary to-accent-secondary flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[--status-success] rounded-full border-2 border-[--bg-raised]" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-accent-success rounded-full border-2 border-base-light" />
           </div>
           <div>
-            <h3 className="font-display font-semibold text-[--text-primary]">DevForge AI</h3>
-            <p className="text-xs text-[--text-muted]">Consultor de Produto</p>
+            <h3 className="font-display font-semibold text-white">DevForge AI</h3>
+            <p className="text-xs text-gray-400">Consultor de Produto</p>
           </div>
         </div>
       </div>
@@ -167,10 +167,10 @@ export default function IntakeChat({ projectId, onComplete }: IntakeChatProps) {
               <div
                 className={`max-w-[85%] md:max-w-[70%] rounded-2xl px-4 py-3 ${
                   msg.role === 'USER'
-                    ? 'bg-[--phase-intake] text-white ml-auto'
+                    ? 'bg-accent-primary text-white ml-auto'
                     : msg.role === 'AGENT'
-                    ? 'bg-[--bg-raised] text-[--text-primary] border border-[--border]'
-                    : 'bg-[--status-warning]/10 text-[--status-warning] border border-[--status-warning]/20 text-center text-sm'
+                    ? 'bg-base-lighter text-white border border-base-lighter'
+                    : 'bg-accent-warning/10 text-accent-warning border border-accent-warning/20 text-center text-sm'
                 }`}
               >
                 <p className="whitespace-pre-wrap font-body text-sm leading-relaxed">
@@ -186,7 +186,7 @@ export default function IntakeChat({ projectId, onComplete }: IntakeChatProps) {
                   <button
                     key={i}
                     onClick={() => handleQuickReply(reply)}
-                    className="px-4 py-2 rounded-full border border-[--border-bright] hover:border-[--phase-intake] hover:bg-[--phase-intake]/10 text-sm font-medium text-[--text-secondary] hover:text-[--phase-intake] transition-all duration-200"
+                    className="px-4 py-2 rounded-full border border-base-lighter hover:border-accent-primary hover:bg-accent-primary/10 text-sm font-medium text-gray-300 hover:text-accent-primary transition-all duration-200"
                   >
                     {reply}
                   </button>
@@ -197,7 +197,7 @@ export default function IntakeChat({ projectId, onComplete }: IntakeChatProps) {
             {/* Timestamp (só para USER e última do AGENT) */}
             {(msg.role === 'USER' || (msg.role === 'AGENT' && index === messages.length - 1)) && (
               <p
-                className={`text-xs text-[--text-muted] mt-1 ${
+                className={`text-xs text-gray-500 mt-1 ${
                   msg.role === 'USER' ? 'text-right mr-1' : 'ml-4'
                 }`}
               >
@@ -213,11 +213,11 @@ export default function IntakeChat({ projectId, onComplete }: IntakeChatProps) {
         {/* Typing Indicator */}
         {isTyping && (
           <div className="flex justify-start">
-            <div className="bg-[--bg-raised] border border-[--border] rounded-2xl px-5 py-4">
+            <div className="bg-base-lighter border border-base-lighter rounded-2xl px-5 py-4">
               <div className="flex gap-1.5">
-                <div className="w-2 h-2 bg-[--text-muted] rounded-full animate-bounce [animation-delay:-0.3s]" />
-                <div className="w-2 h-2 bg-[--text-muted] rounded-full animate-bounce [animation-delay:-0.15s]" />
-                <div className="w-2 h-2 bg-[--text-muted] rounded-full animate-bounce" />
+                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
               </div>
             </div>
           </div>
@@ -227,7 +227,7 @@ export default function IntakeChat({ projectId, onComplete }: IntakeChatProps) {
       </div>
 
       {/* Input */}
-      <div className="px-6 py-4 border-t border-[--border] bg-[--bg-raised]/30">
+      <div className="px-6 py-4 border-t border-base-lighter bg-base-lighter/30">
         <div className="flex items-end gap-3">
           <textarea
             value={input}
@@ -236,7 +236,7 @@ export default function IntakeChat({ projectId, onComplete }: IntakeChatProps) {
             placeholder="Escreve a tua mensagem..."
             disabled={isSending}
             rows={1}
-            className="flex-1 bg-[--bg-base] border border-[--border] rounded-xl px-4 py-3 text-[--text-primary] placeholder-[--text-muted] focus:outline-none focus:ring-2 focus:ring-[--phase-intake] resize-none font-body text-sm disabled:opacity-50 disabled:cursor-not-allowed max-h-32"
+            className="flex-1 bg-base border border-base-lighter rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-primary/50 resize-none text-sm disabled:opacity-50 disabled:cursor-not-allowed max-h-32"
             style={{
               minHeight: '44px',
               height: 'auto'
@@ -252,13 +252,13 @@ export default function IntakeChat({ projectId, onComplete }: IntakeChatProps) {
             id="send-btn"
             onClick={handleSend}
             disabled={!input.trim() || isSending}
-            className="shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br from-[--phase-intake] to-[--phase-plan] hover:shadow-lg hover:shadow-[--phase-intake]/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center group"
+            className="shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br from-accent-primary to-accent-secondary hover:shadow-lg hover:shadow-accent-primary/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center group"
           >
             <Send className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
           </button>
         </div>
 
-        <p className="text-xs text-[--text-muted] mt-3 text-center">
+        <p className="text-xs text-gray-500 mt-3 text-center">
           Enter para enviar • Shift+Enter para nova linha
         </p>
       </div>

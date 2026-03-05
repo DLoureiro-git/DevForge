@@ -42,7 +42,7 @@ const statusConfig = {
   }
 }
 
-export default function ChecklistProgress({ checks, isLoading }: ChecklistProgressProps) {
+export default function ChecklistProgress({ checks }: ChecklistProgressProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
   const [filterStatus, setFilterStatus] = useState<'all' | 'failed' | 'critical'>('all')
@@ -110,7 +110,7 @@ export default function ChecklistProgress({ checks, isLoading }: ChecklistProgre
 
   // Expandir primeira categoria com checks failed ou critical
   const firstFailedCategory = filteredChecks.find(([, checks]) =>
-    checks.some(c => c.status === 'failed' || (c.isCritical && c.status === 'failed'))
+    checks.some(c => c.status === 'failed')
   )?.[0]
 
   return (
@@ -280,7 +280,7 @@ export default function ChecklistProgress({ checks, isLoading }: ChecklistProgre
                             {/* Status Icon */}
                             <Icon
                               className={`w-5 h-5 mt-0.5 shrink-0 ${config.color} ${
-                                config.animate ? 'animate-spin' : ''
+                                'animate' in config && config.animate ? 'animate-spin' : ''
                               }`}
                             />
 

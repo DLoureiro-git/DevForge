@@ -7,7 +7,7 @@
 import BugTracker from '../BugTracker'
 import QAScoreCard from '../QAScoreCard'
 import ChecklistProgress from '../ChecklistProgress'
-import type { Bug, Check, QAData } from '../types/qa'
+import type { Bug, Check } from '../types/qa'
 
 // DADOS MOCK — Bugs
 export const mockBugs: Bug[] = [

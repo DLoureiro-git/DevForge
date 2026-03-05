@@ -1,0 +1,75 @@
+devforge-v2/studio/frontend/
+│
+├── 📝 Configuração
+│   ├── package.json              # Dependencies (React, Vite, Tailwind)
+│   ├── vite.config.ts            # Vite + proxy backend
+│   ├── tsconfig.json             # TypeScript strict
+│   ├── tailwind.config.js        # Design system V2
+│   ├── postcss.config.js         # PostCSS
+│   ├── .eslintrc.cjs             # ESLint
+│   ├── .gitignore                # Git ignore
+│   └── index.html                # HTML base
+│
+├── 📚 Documentação
+│   ├── README.md                 # Overview projeto
+│   ├── INSTALACAO_COMPLETA.md    # Status instalação
+│   ├── ESTRUTURA.md              # Estrutura detalhada
+│   ├── EXEMPLOS.md               # Exemplos de uso
+│   ├── COMANDOS.md               # Comandos úteis
+│   └── TREE.txt                  # Este ficheiro
+│
+├── 🚀 Scripts
+│   └── dev.sh                    # Script desenvolvimento
+│
+└── src/
+    │
+    ├── 🎨 Main & CSS
+    │   ├── main.tsx              # Entry point React
+    │   └── index.css             # Design system global
+    │
+    ├── 🗺️ App & Router
+    │   └── App.tsx               # Router principal
+    │
+    ├── 📄 Pages (3)
+    │   ├── Dashboard.tsx         # Lista projetos + métricas
+    │   ├── ProjectView.tsx       # View projeto (3 colunas)
+    │   └── Settings.tsx          # Config API keys
+    │
+    ├── 🧩 Components (11 + QA suite)
+    │   ├── PipelineVisual.tsx    # 6 fases pipeline
+    │   ├── ProgressNarrative.tsx # Narrativa + progress
+    │   ├── DeliveryCard.tsx      # Card conclusão + confetti
+    │   ├── Logs.tsx              # Terminal logs SSE
+    │   ├── IntakeChat.tsx        # Chat PM Agent
+    │   ├── ErrorBoundary.tsx     # Error handling
+    │   ├── ChecklistProgress.tsx # QA checklist
+    │   ├── QAScoreCard.tsx       # QA score display
+    │   ├── BugTracker.tsx        # Bug tracking
+    │   ├── index.ts              # Barrel export
+    │   │
+    │   ├── qa/                   # QA Components Suite
+    │   │   ├── QADashboard.tsx   # Dashboard QA
+    │   │   ├── qa-demo.tsx       # Demo + mock data
+    │   │   ├── README.md         # QA docs
+    │   │   └── INTEGRATION_EXAMPLE.md
+    │   │
+    │   └── types/
+    │       └── qa.ts             # QA types
+    │
+    ├── 📚 Lib (2)
+    │   ├── api.ts                # Cliente API REST
+    │   └── store.ts              # Zustand store
+    │
+    ├── 🎣 Hooks (1)
+    │   └── useSSE.ts             # Hook SSE
+    │
+    └── 📘 Types (1)
+        └── index.ts              # Types globais
+
+📊 Stats:
+- 15 ficheiros novos criados
+- 6 ficheiros existentes ajustados
+- 257 packages npm instalados
+- Build OK (221KB JS, 35KB CSS)
+- TypeScript strict mode
+- 100% funcional

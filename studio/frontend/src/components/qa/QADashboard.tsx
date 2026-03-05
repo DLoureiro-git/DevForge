@@ -77,7 +77,7 @@ export default function QADashboard({
   // WebSocket para real-time updates (opcional)
   useEffect(() => {
     let ws: WebSocket | null = null
-    let reconnectTimeout: NodeJS.Timeout
+    let reconnectTimeout: ReturnType<typeof setTimeout>
 
     const connectWebSocket = () => {
       try {

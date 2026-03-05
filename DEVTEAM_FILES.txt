@@ -1,0 +1,75 @@
+DevForge V2 — Dev Team Agents
+Ficheiros Criados (Paths Absolutos)
+
+═══════════════════════════════════════════════════════════════════════════
+
+CÓDIGO TYPESCRIPT
+───────────────────────────────────────────────────────────────────────────
+
+Orquestrador:
+/Users/diogoloureiro/devforge-v2/studio/backend/src/services/dev-team.ts
+
+Developers:
+/Users/diogoloureiro/devforge-v2/studio/backend/src/services/devs/frontend-dev.ts
+/Users/diogoloureiro/devforge-v2/studio/backend/src/services/devs/backend-dev.ts
+/Users/diogoloureiro/devforge-v2/studio/backend/src/services/devs/database-dev.ts
+/Users/diogoloureiro/devforge-v2/studio/backend/src/services/devs/utils-dev.ts
+
+Configuração:
+/Users/diogoloureiro/devforge-v2/studio/backend/src/services/devs/dev-config.ts
+/Users/diogoloureiro/devforge-v2/studio/backend/src/services/devs/index.ts
+
+Lib (melhorado):
+/Users/diogoloureiro/devforge-v2/studio/backend/src/lib/ollama.ts
+
+
+TESTES
+───────────────────────────────────────────────────────────────────────────
+
+/Users/diogoloureiro/devforge-v2/studio/backend/src/services/__tests__/dev-team.test.ts
+
+
+EXEMPLOS
+───────────────────────────────────────────────────────────────────────────
+
+/Users/diogoloureiro/devforge-v2/studio/backend/src/examples/dev-team-example.ts
+
+
+DOCUMENTAÇÃO
+───────────────────────────────────────────────────────────────────────────
+
+README (Dev Team):
+/Users/diogoloureiro/devforge-v2/studio/backend/src/services/devs/README.md
+
+Quick Start:
+/Users/diogoloureiro/devforge-v2/studio/backend/src/services/devs/QUICKSTART.md
+
+Integration Guide:
+/Users/diogoloureiro/devforge-v2/studio/backend/src/services/INTEGRATION.md
+
+Changelog:
+/Users/diogoloureiro/devforge-v2/DEVTEAM_CHANGELOG.md
+
+Este ficheiro:
+/Users/diogoloureiro/devforge-v2/DEVTEAM_FILES.txt
+
+
+CONFIGURAÇÃO
+───────────────────────────────────────────────────────────────────────────
+
+Environment Variables:
+/Users/diogoloureiro/devforge-v2/studio/backend/.env.example
+
+
+EXPORTS
+───────────────────────────────────────────────────────────────────────────
+
+Services Index (actualizado):
+/Users/diogoloureiro/devforge-v2/studio/backend/src/services/index.ts
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+TOTAL: 12 ficheiros novos + 2 actualizados (ollama.ts, index.ts, .env.example)
+
+═══════════════════════════════════════════════════════════════════════════

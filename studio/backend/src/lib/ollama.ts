@@ -1,0 +1,155 @@
+// DevForge V2 — Ollama Client
+const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+const TIMEOUT_MS = 10000;
+
+interface OllamaModel {
+  name: string;
+  size: number;
+  modified_at: string;
+}
+
+interface OllamaListResponse {
+  models: OllamaModel[];
+}
+
+interface OllamaGenerateRequest {
+  model: string;
+  prompt: string;
+  system?: string;
+  stream?: boolean;
+  options?: Record<string, unknown>;
+}
+
+interface OllamaGenerateResponse {
+  model: string;
+  response: string;
+  done: boolean;
+  context?: number[];
+}
+
+export class OllamaClient {
+  private baseUrl: string;
+  private timeout: number;
+
+  constructor(baseUrl: string = OLLAMA_BASE_URL, timeout: number = TIMEOUT_MS) {
+    this.baseUrl = baseUrl;
+    this.timeout = timeout;
+  }
+
+  async checkHealth(): Promise<boolean> {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+      const response = await fetch(`${this.baseUrl}/api/tags`, {
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        return false;
+      }
+
+      const data = (await response.json()) as OllamaListResponse;
+      return Array.isArray(data.models);
+    } catch (error) {
+      console.error('[Ollama] Health check failed:', error);
+      return false;
+    }
+  }
+
+  async listModels(): Promise<string[]> {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+      const response = await fetch(`${this.baseUrl}/api/tags`, {
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`Failed to list models: ${response.statusText}`);
+      }
+
+      const data = (await response.json()) as OllamaListResponse;
+      return data.models.map((m) => m.name);
+    } catch (error) {
+      console.error('[Ollama] Failed to list models:', error);
+      throw error;
+    }
+  }
+
+  async generate(
+    model: string,
+    prompt: string,
+    systemPrompt?: string,
+    options?: Record<string, unknown>
+  ): Promise<string> {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 300000); // 5min timeout for generation
+
+      const body: OllamaGenerateRequest = {
+        model,
+        prompt,
+        system: systemPrompt,
+        stream: false,
+        options,
+      };
+
+      const response = await fetch(`${this.baseUrl}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`Generation failed: ${response.statusText}`);
+      }
+
+      const data = (await response.json()) as OllamaGenerateResponse;
+      return data.response;
+    } catch (error) {
+      console.error('[Ollama] Generation failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remover markdown code blocks (```) do output
+   */
+  removeMarkdownCodeBlocks(text: string): string {
+    // Se começa com ``` e termina com ```, remover
+    if (text.startsWith('```') && text.endsWith('```')) {
+      const lines = text.split('\n');
+      // Remover primeira linha (```language) e última (```)
+      return lines.slice(1, -1).join('\n');
+    }
+
+    // Se tem apenas no início
+    if (text.startsWith('```')) {
+      const lines = text.split('\n');
+      return lines.slice(1).join('\n');
+    }
+
+    // Se tem apenas no fim
+    if (text.endsWith('```')) {
+      const lines = text.split('\n');
+      return lines.slice(0, -1).join('\n');
+    }
+
+    return text;
+  }
+}
+
+export const ollama = new OllamaClient();
+
+export async function checkOllamaHealth(): Promise<boolean> {
+  return ollama.checkHealth();
+}
