@@ -55,6 +55,7 @@ const team_js_1 = __importDefault(require("./routes/team.js"));
 const settings_js_1 = __importDefault(require("./routes/settings.js"));
 const health_js_1 = __importDefault(require("./routes/health.js"));
 const ollama_js_2 = __importDefault(require("./routes/ollama.js"));
+const metrics_js_1 = __importDefault(require("./routes/metrics.js"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5680;
@@ -110,6 +111,7 @@ app.use('/api/projects', team_js_1.default);
 app.use('/api/settings', settings_js_1.default);
 app.use('/api/health', health_js_1.default);
 app.use('/api/ollama', ollama_js_2.default);
+app.use('/api/metrics', metrics_js_1.default);
 // Root endpoint
 app.get('/', (req, res) => {
     res.json({
