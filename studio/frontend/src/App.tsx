@@ -4,6 +4,8 @@ import { ProjectView } from './pages/ProjectView'
 import { Settings } from './pages/Settings'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { useAutoAuth } from './hooks/useAutoAuth'
+import DevForgeNew from './pages/DevForgeNew'
+import './styles/devforge-new.css'
 
 function App() {
   // Inicializar autenticação automática
@@ -19,12 +21,18 @@ function App() {
         height: '100vh',
         fontFamily: 'system-ui, sans-serif',
         color: '#666',
+        background: '#07070E',
       }}>
         A inicializar DevForge V2...
       </div>
     )
   }
 
+  // Usar novo design
+  return <DevForgeNew />
+
+  // Design antigo (comentado para referência)
+  /*
   return (
     <ErrorBoundary>
       <BrowserRouter>
@@ -37,6 +45,7 @@ function App() {
       </BrowserRouter>
     </ErrorBoundary>
   )
+  */
 }
 
 export default App
