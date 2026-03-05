@@ -1,10 +1,16 @@
+"use strict";
 /**
  * Auth Validators - Categoria D: Autenticação & Autorização
  */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.validateRouteProtection = validateRouteProtection;
+exports.validatePasswordSecurity = validatePasswordSecurity;
+exports.validateSessionExpiry = validateSessionExpiry;
+exports.validateLogout = validateLogout;
 // ============================================================================
 // D1: ROUTE PROTECTION
 // ============================================================================
-export async function validateRouteProtection(browser, projectPath, deployUrl) {
+async function validateRouteProtection(browser, projectPath, deployUrl) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'auth-001';
@@ -98,7 +104,7 @@ export async function validateRouteProtection(browser, projectPath, deployUrl) {
 // ============================================================================
 // D2: PASSWORD SECURITY
 // ============================================================================
-export async function validatePasswordSecurity(browser, projectPath, deployUrl) {
+async function validatePasswordSecurity(browser, projectPath, deployUrl) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'auth-002';
@@ -247,7 +253,7 @@ export async function validatePasswordSecurity(browser, projectPath, deployUrl) 
 // ============================================================================
 // D3: SESSION EXPIRY
 // ============================================================================
-export async function validateSessionExpiry(browser, projectPath, deployUrl) {
+async function validateSessionExpiry(browser, projectPath, deployUrl) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'auth-003';
@@ -351,7 +357,7 @@ export async function validateSessionExpiry(browser, projectPath, deployUrl) {
 // ============================================================================
 // D4: LOGOUT
 // ============================================================================
-export async function validateLogout(browser, projectPath, deployUrl) {
+async function validateLogout(browser, projectPath, deployUrl) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'auth-004';

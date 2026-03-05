@@ -1,30 +1,39 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.anthropic = void 0;
+exports.createAnthropicClient = createAnthropicClient;
+exports.checkAnthropicHealth = checkAnthropicHealth;
+exports.withRetry = withRetry;
 // DevForge V2 — Anthropic Client Singleton
-import Anthropic from '@anthropic-ai/sdk';
+const sdk_1 = __importDefault(require("@anthropic-ai/sdk"));
 const globalForAnthropic = globalThis;
-export const anthropic = globalForAnthropic.anthropic ??
-    new Anthropic({
+exports.anthropic = globalForAnthropic.anthropic ??
+    new sdk_1.default({
         apiKey: process.env.ANTHROPIC_API_KEY,
         maxRetries: 3,
     });
 if (process.env.NODE_ENV !== 'production')
-    globalForAnthropic.anthropic = anthropic;
+    globalForAnthropic.anthropic = exports.anthropic;
 /**
  * Cria um cliente Anthropic com a API Key do utilizador
  * @param userApiKey - API Key fornecida pelo utilizador
  */
-export function createAnthropicClient(userApiKey) {
-    return new Anthropic({
+function createAnthropicClient(userApiKey) {
+    return new sdk_1.default({
         apiKey: userApiKey,
         maxRetries: 3,
     });
 }
-export async function checkAnthropicHealth() {
+async function checkAnthropicHealth() {
     if (!process.env.ANTHROPIC_API_KEY) {
         return false;
     }
     try {
         // Test API key with minimal request
-        await anthropic.messages.create({
+        await exports.anthropic.messages.create({
             model: 'claude-3-5-sonnet-20241022',
             max_tokens: 10,
             messages: [{ role: 'user', content: 'Hi' }],
@@ -36,7 +45,7 @@ export async function checkAnthropicHealth() {
         return false;
     }
 }
-export async function withRetry(fn, options = {}) {
+async function withRetry(fn, options = {}) {
     const { maxRetries = 3, delayMs = 1000 } = options;
     let lastError;
     for (let i = 0; i < maxRetries; i++) {

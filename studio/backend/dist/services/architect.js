@@ -1,3 +1,4 @@
+"use strict";
 /**
  * ARCHITECT AGENT — Traduz PRD em Arquitectura Técnica
  *
@@ -7,8 +8,13 @@
  * - File structure
  * - REGRAS TÉCNICAS (para prevenir context drift)
  */
-import Anthropic from '@anthropic-ai/sdk';
-const client = new Anthropic({
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ArchitectAgent = void 0;
+const sdk_1 = __importDefault(require("@anthropic-ai/sdk"));
+const client = new sdk_1.default({
     apiKey: process.env.ANTHROPIC_API_KEY
 });
 const ARCHITECT_SYSTEM_PROMPT = `És o Architect Agent do DevForge — um arquitecto de software sénior com 20 anos de experiência.
@@ -135,7 +141,7 @@ NÃO INCLUIR:
 - Código completo (só estrutura)
 - Comentários longos
 - Anything além do JSON`;
-export class ArchitectAgent {
+class ArchitectAgent {
     /**
      * Gerar arquitectura completa a partir do PRD
      */
@@ -416,3 +422,4 @@ Gera JSON puro (sem markdown).`;
         return plan;
     }
 }
+exports.ArchitectAgent = ArchitectAgent;

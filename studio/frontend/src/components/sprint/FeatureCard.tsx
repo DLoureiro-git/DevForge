@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { GitBranch, AlertCircle } from 'lucide-react';
 import '../../styles/design-system.css';

@@ -1,9 +1,12 @@
+"use strict";
 /**
  * UTILS DEVELOPER AGENT
  * Especializado em: Contexts, Hooks, Utility Functions, Types
  */
-import { ollama } from '../../lib/ollama';
-import { getModelForDev, getOllamaOptions, devLog } from './dev-config';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UtilsDev = void 0;
+const ollama_1 = require("../../lib/ollama");
+const dev_config_1 = require("./dev-config");
 const UTILS_DEV_SYSTEM_PROMPT = `Você é um Developer especializado em Contexts, Utils e Shared Logic.
 
 Sua responsabilidade:
@@ -68,10 +71,10 @@ FORMATO DE OUTPUT:
 Retorne APENAS o código do ficheiro, sem explicações extras.
 Se não houver mudanças necessárias, retorne "NO_CHANGES".
 NÃO incluir markdown code blocks (sem \`\`\`).`;
-export class UtilsDev {
+class UtilsDev {
     model;
     constructor(model) {
-        this.model = model || getModelForDev('utils');
+        this.model = model || (0, dev_config_1.getModelForDev)('utils');
     }
     async generateCode(request) {
         const startTime = Date.now();
@@ -91,11 +94,11 @@ Descrição: ${request.fileDescription}
 Implemente o código completo seguindo a arquitectura e regras técnicas.
 Se não houver mudanças necessárias, retorne "NO_CHANGES".
 Retorne APENAS o código, sem markdown code blocks, sem explicações.`;
-            devLog(`[Utils] Gerando ${request.filePath}...`);
+            (0, dev_config_1.devLog)(`[Utils] Gerando ${request.filePath}...`);
             // Gerar código
-            const rawCode = await ollama.generate(this.model, prompt, UTILS_DEV_SYSTEM_PROMPT, getOllamaOptions());
+            const rawCode = await ollama_1.ollama.generate(this.model, prompt, UTILS_DEV_SYSTEM_PROMPT, (0, dev_config_1.getOllamaOptions)());
             // Limpar markdown code blocks se existirem
-            const code = ollama.removeMarkdownCodeBlocks(rawCode).trim();
+            const code = ollama_1.ollama.removeMarkdownCodeBlocks(rawCode).trim();
             // Verificar se é NO_CHANGES
             if (code === 'NO_CHANGES' || code.includes('NO_CHANGES')) {
                 return {
@@ -122,3 +125,4 @@ Retorne APENAS o código, sem markdown code blocks, sem explicações.`;
         }
     }
 }
+exports.UtilsDev = UtilsDev;

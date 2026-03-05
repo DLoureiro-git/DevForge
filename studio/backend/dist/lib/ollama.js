@@ -1,7 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ollama = exports.OllamaClient = void 0;
+exports.checkOllamaHealth = checkOllamaHealth;
 // DevForge V2 — Ollama Client
 const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
 const TIMEOUT_MS = 10000;
-export class OllamaClient {
+class OllamaClient {
     baseUrl;
     timeout;
     constructor(baseUrl = OLLAMA_BASE_URL, timeout = TIMEOUT_MS) {
@@ -148,7 +152,8 @@ export class OllamaClient {
         return text;
     }
 }
-export const ollama = new OllamaClient();
-export async function checkOllamaHealth() {
-    return ollama.checkHealth();
+exports.OllamaClient = OllamaClient;
+exports.ollama = new OllamaClient();
+async function checkOllamaHealth() {
+    return exports.ollama.checkHealth();
 }

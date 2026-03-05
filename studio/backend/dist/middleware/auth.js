@@ -1,5 +1,9 @@
-import { prisma } from '../lib/prisma.js';
-export async function requireAuth(req, res, next) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.requireAuth = requireAuth;
+exports.extractUser = extractUser;
+const prisma_js_1 = require("../lib/prisma.js");
+async function requireAuth(req, res, next) {
     try {
         // For now, we'll use a simple header-based auth
         // TODO: Replace with Better-Auth session validation
@@ -8,7 +12,7 @@ export async function requireAuth(req, res, next) {
             res.status(401).json({ error: 'Unauthorized: No user ID provided' });
             return;
         }
-        const user = await prisma.user.findUnique({
+        const user = await prisma_js_1.prisma.user.findUnique({
             where: { id: userId },
             select: {
                 id: true,
@@ -29,11 +33,11 @@ export async function requireAuth(req, res, next) {
         res.status(500).json({ error: 'Internal server error' });
     }
 }
-export async function extractUser(req, res, next) {
+async function extractUser(req, res, next) {
     try {
         const userId = req.headers['x-user-id'];
         if (userId) {
-            const user = await prisma.user.findUnique({
+            const user = await prisma_js_1.prisma.user.findUnique({
                 where: { id: userId },
                 select: {
                     id: true,

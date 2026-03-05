@@ -1,3 +1,6 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.sseManager = void 0;
 class SSEManager {
     connections = new Map();
     addConnection(projectId, res) {
@@ -56,4 +59,4 @@ class SSEManager {
         return Array.from(this.connections.values()).reduce((sum, conns) => sum + conns.length, 0);
     }
 }
-export const sseManager = new SSEManager();
+exports.sseManager = new SSEManager();

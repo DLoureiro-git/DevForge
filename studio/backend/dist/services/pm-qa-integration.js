@@ -1,19 +1,28 @@
+"use strict";
 /**
  * DevForge V2 - Integração PM Agent + QA System
  * Demonstra como o PM Agent pode usar o sistema de QA
  */
-import { executeQA, executeQuickQA, generateQAReport } from './qa-executor';
-import { writeFileSync } from 'fs';
-import { join } from 'path';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.pmValidateProject = pmValidateProject;
+exports.pmPreDeployCheck = pmPreDeployCheck;
+exports.pmAutoFixBugs = pmAutoFixBugs;
+exports.pmContinuousValidation = pmContinuousValidation;
+exports.pmFullWorkflow = pmFullWorkflow;
+exports.pmNotifyQAResults = pmNotifyQAResults;
+exports.exampleIntegration = exampleIntegration;
+const qa_executor_1 = require("./qa-executor");
+const fs_1 = require("fs");
+const path_1 = require("path");
 // ============================================================================
 // PM AGENT ACTIONS
 // ============================================================================
 /**
  * Action: Validar projeto após build
  */
-export async function pmValidateProject(params) {
+async function pmValidateProject(params) {
     console.log(`🔍 PM Agent: Validando projeto ${params.projectId}...`);
-    const result = await executeQA({
+    const result = await (0, qa_executor_1.executeQA)({
         prd: params.prd,
         projectPath: params.projectPath,
         deployUrl: params.deployUrl,
@@ -21,18 +30,18 @@ export async function pmValidateProject(params) {
         autoFix: false,
     });
     // Guardar relatório no projeto
-    const reportPath = join(params.projectPath, 'qa-report.md');
-    const report = generateQAReport(result);
-    writeFileSync(reportPath, report);
+    const reportPath = (0, path_1.join)(params.projectPath, 'qa-report.md');
+    const report = (0, qa_executor_1.generateQAReport)(result);
+    (0, fs_1.writeFileSync)(reportPath, report);
     console.log(`✅ Relatório guardado: ${reportPath}`);
     return result;
 }
 /**
  * Action: Quick check antes de deploy
  */
-export async function pmPreDeployCheck(params) {
+async function pmPreDeployCheck(params) {
     console.log(`⚡ PM Agent: Pre-deploy check para ${params.projectId}...`);
-    const result = await executeQuickQA({
+    const result = await (0, qa_executor_1.executeQuickQA)({
         prd: params.prd,
         projectPath: params.projectPath,
         deployUrl: params.deployUrl,
@@ -54,9 +63,9 @@ export async function pmPreDeployCheck(params) {
 /**
  * Action: Auto-fix de bugs após detecção
  */
-export async function pmAutoFixBugs(params) {
+async function pmAutoFixBugs(params) {
     console.log(`🔧 PM Agent: Auto-fix de bugs em ${params.projectId}...`);
-    const result = await executeQA({
+    const result = await (0, qa_executor_1.executeQA)({
         prd: params.prd,
         projectPath: params.projectPath,
         deployUrl: params.deployUrl,
@@ -75,9 +84,9 @@ export async function pmAutoFixBugs(params) {
 /**
  * Action: Validação contínua (CI/CD)
  */
-export async function pmContinuousValidation(params) {
+async function pmContinuousValidation(params) {
     console.log(`🔄 PM Agent: Validação contínua ${params.projectId}...`);
-    const result = await executeQA({
+    const result = await (0, qa_executor_1.executeQA)({
         prd: params.prd,
         projectPath: params.projectPath,
         deployUrl: params.deployUrl,
@@ -103,13 +112,13 @@ export async function pmContinuousValidation(params) {
 /**
  * Workflow: Build → QA → Fix → Deploy
  */
-export async function pmFullWorkflow(params) {
+async function pmFullWorkflow(params) {
     console.log(`\n${'='.repeat(60)}`);
     console.log(`PM Agent: Workflow Completo - ${params.projectId}`);
     console.log(`${'='.repeat(60)}\n`);
     // 1. Quick check inicial
     console.log('📊 Fase 1: Quick Check...');
-    const quickResult = await executeQuickQA({
+    const quickResult = await (0, qa_executor_1.executeQuickQA)({
         prd: params.prd,
         projectPath: params.projectPath,
         deployUrl: params.deployUrl,
@@ -122,7 +131,7 @@ export async function pmFullWorkflow(params) {
     console.log(`✅ Quick check passou: ${quickResult.score.percentage}%\n`);
     // 2. Validação completa
     console.log('🔍 Fase 2: Validação Completa...');
-    const fullResult = await executeQA({
+    const fullResult = await (0, qa_executor_1.executeQA)({
         prd: params.prd,
         projectPath: params.projectPath,
         deployUrl: params.deployUrl,
@@ -144,7 +153,7 @@ export async function pmFullWorkflow(params) {
     }
     // 4. Validação final
     console.log('✅ Fase 4: Validação Final...');
-    const finalResult = await executeQuickQA({
+    const finalResult = await (0, qa_executor_1.executeQuickQA)({
         prd: params.prd,
         projectPath: params.projectPath,
         deployUrl: params.deployUrl,
@@ -161,9 +170,9 @@ export async function pmFullWorkflow(params) {
         console.log('❌ Projeto NÃO aprovado. Corrigir bugs antes de deploy.');
     }
     // Guardar relatório final
-    const reportPath = join(params.projectPath, 'qa-final-report.md');
-    const report = generateQAReport(finalResult);
-    writeFileSync(reportPath, report);
+    const reportPath = (0, path_1.join)(params.projectPath, 'qa-final-report.md');
+    const report = (0, qa_executor_1.generateQAReport)(finalResult);
+    (0, fs_1.writeFileSync)(reportPath, report);
     console.log(`\n📄 Relatório final: ${reportPath}\n`);
     return {
         success,
@@ -176,7 +185,7 @@ export async function pmFullWorkflow(params) {
 /**
  * Notificar utilizador sobre resultados de QA
  */
-export function pmNotifyQAResults(result, notifyFn) {
+function pmNotifyQAResults(result, notifyFn) {
     const icon = result.score.percentage >= 80 ? '✅' : '⚠️';
     let message = `${icon} QA Completo\n\n`;
     message += `Score: ${result.score.percentage}%\n`;
@@ -220,7 +229,3 @@ async function exampleIntegration() {
         console.log('❌ Deploy bloqueado');
     }
 }
-// ============================================================================
-// EXPORT
-// ============================================================================
-export { exampleIntegration, };

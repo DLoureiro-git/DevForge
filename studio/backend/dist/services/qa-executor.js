@@ -1,23 +1,61 @@
+"use strict";
 /**
  * DevForge V2 - QA Executor
  * Orquestra execução completa do sistema de QA inteligente
  */
-import { generateAdaptiveChecklist, calculateQAScore, initBrowser, estimateTotalTime, groupChecksByCategory, getAutomatableChecks, getCriticalChecks, } from './qa-engine';
-import { runBatchBugFix } from './bug-fix-loop';
-import * as validators from './validators';
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.executeQA = executeQA;
+exports.executeQuickQA = executeQuickQA;
+exports.generateQAReport = generateQAReport;
+const qa_engine_1 = require("./qa-engine");
+const bug_fix_loop_1 = require("./bug-fix-loop");
+const validators = __importStar(require("./validators"));
 // ============================================================================
 // MAIN EXECUTOR
 // ============================================================================
-export async function executeQA(config) {
+async function executeQA(config) {
     const startTime = Date.now();
     console.log('🚀 DevForge V2 - QA Engine iniciado\n');
     // 1. Gerar checklist adaptativa baseada no PRD
     console.log('📋 Gerando checklist adaptativa...');
-    const checklist = generateAdaptiveChecklist(config.prd);
+    const checklist = (0, qa_engine_1.generateAdaptiveChecklist)(config.prd);
     console.log(`✅ ${checklist.length} checks identificados`);
-    console.log(`⏱️  Tempo estimado: ${estimateTotalTime(checklist)} minutos\n`);
+    console.log(`⏱️  Tempo estimado: ${(0, qa_engine_1.estimateTotalTime)(checklist)} minutos\n`);
     // Mostrar breakdown por categoria
-    const byCategory = groupChecksByCategory(checklist);
+    const byCategory = (0, qa_engine_1.groupChecksByCategory)(checklist);
     console.log('📊 Breakdown por categoria:');
     for (const [category, checks] of Object.entries(byCategory)) {
         console.log(`   ${category}: ${checks.length} checks`);
@@ -25,11 +63,11 @@ export async function executeQA(config) {
     console.log('');
     // 2. Inicializar browser
     console.log('🌐 Inicializando browser Playwright...');
-    const browser = await initBrowser(config.headless ?? true);
+    const browser = await (0, qa_engine_1.initBrowser)(config.headless ?? true);
     // 3. Executar validações
     console.log('\n🔍 Executando validações...\n');
     const validationResults = [];
-    const automatableChecks = getAutomatableChecks(checklist);
+    const automatableChecks = (0, qa_engine_1.getAutomatableChecks)(checklist);
     for (let i = 0; i < automatableChecks.length; i++) {
         const check = automatableChecks[i];
         console.log(`[${i + 1}/${automatableChecks.length}] ${check.description}...`);
@@ -65,7 +103,7 @@ export async function executeQA(config) {
     console.log(`   ❌ Falhou: ${failed}`);
     console.log(`   🐛 Total bugs: ${allBugs.length}\n`);
     // 5. Calcular score
-    const score = calculateQAScore(allBugs);
+    const score = (0, qa_engine_1.calculateQAScore)(allBugs);
     score.passed = passed;
     score.failed = failed;
     console.log('🎯 QA Score:');
@@ -86,7 +124,7 @@ export async function executeQA(config) {
     let autoFixResults;
     if (config.autoFix && allBugs.length > 0) {
         console.log('🔧 Iniciando auto-fix de bugs...\n');
-        autoFixResults = await runBatchBugFix(allBugs, checklist, {
+        autoFixResults = await (0, bug_fix_loop_1.runBatchBugFix)(allBugs, checklist, {
             maxIterations: 10,
             ollamaModel: 'qwen2.5-coder:14b',
             ollamaEndpoint: config.ollamaEndpoint || 'http://localhost:11434',
@@ -116,14 +154,14 @@ export async function executeQA(config) {
 // ============================================================================
 // QUICK CHECKS (APENAS CRÍTICOS)
 // ============================================================================
-export async function executeQuickQA(config) {
+async function executeQuickQA(config) {
     console.log('⚡ DevForge V2 - Quick QA (apenas checks críticos)\n');
-    const fullChecklist = generateAdaptiveChecklist(config.prd);
-    const criticalChecks = getCriticalChecks(fullChecklist);
+    const fullChecklist = (0, qa_engine_1.generateAdaptiveChecklist)(config.prd);
+    const criticalChecks = (0, qa_engine_1.getCriticalChecks)(fullChecklist);
     console.log(`🔍 ${criticalChecks.length} checks críticos identificados\n`);
     // Executar apenas checks críticos
     const modifiedConfig = { ...config };
-    const browser = await initBrowser(config.headless ?? true);
+    const browser = await (0, qa_engine_1.initBrowser)(config.headless ?? true);
     const validationResults = [];
     for (let i = 0; i < criticalChecks.length; i++) {
         const check = criticalChecks[i];
@@ -144,7 +182,7 @@ export async function executeQuickQA(config) {
     }
     await browser.close();
     const allBugs = validationResults.flatMap(r => r.bugs);
-    const score = calculateQAScore(allBugs);
+    const score = (0, qa_engine_1.calculateQAScore)(allBugs);
     score.passed = validationResults.filter(r => r.passed).length;
     score.failed = validationResults.filter(r => !r.passed).length;
     console.log(`\n🎯 Quick QA Score: ${score.total}/${score.maxPossible} (${score.percentage}%)`);
@@ -160,7 +198,7 @@ export async function executeQuickQA(config) {
 // ============================================================================
 // GENERATE REPORT
 // ============================================================================
-export function generateQAReport(result) {
+function generateQAReport(result) {
     let report = `# DevForge V2 - QA Report\n\n`;
     report += `**Data:** ${result.timestamp.toLocaleString('pt-PT')}\n`;
     report += `**Tempo de execução:** ${(result.executionTime / 1000).toFixed(2)}s\n\n`;

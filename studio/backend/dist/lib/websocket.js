@@ -1,3 +1,4 @@
+"use strict";
 /**
  * WEBSOCKET SERVER — Real-time streaming para Feature Pipeline
  *
@@ -6,15 +7,20 @@
  * - LOG_APPENDED: Quando há novo log
  * - FEATURE_UPDATED: Quando há update em status/progress/qaScore
  */
-import { WebSocketServer, WebSocket } from 'ws';
-import { verify } from 'jsonwebtoken';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.initWebSocketServer = initWebSocketServer;
+exports.broadcastToFeature = broadcastToFeature;
+exports.broadcastToProject = broadcastToProject;
+exports.getActiveConnections = getActiveConnections;
+const ws_1 = require("ws");
+const jsonwebtoken_1 = require("jsonwebtoken");
 const JWT_SECRET = process.env.JWT_SECRET || 'devforge-secret-key';
 const clients = new Map();
 /**
  * Inicializar WebSocket Server
  */
-export function initWebSocketServer(server) {
-    const wss = new WebSocketServer({ server, path: '/ws' });
+function initWebSocketServer(server) {
+    const wss = new ws_1.WebSocketServer({ server, path: '/ws' });
     wss.on('connection', (ws, req) => {
         const url = new URL(req.url || '', `http://${req.headers.host}`);
         const token = url.searchParams.get('token');
@@ -25,7 +31,7 @@ export function initWebSocketServer(server) {
         // Validar JWT
         let userId;
         try {
-            const decoded = verify(token, JWT_SECRET);
+            const decoded = (0, jsonwebtoken_1.verify)(token, JWT_SECRET);
             userId = decoded.userId;
         }
         catch (error) {
@@ -82,10 +88,10 @@ export function initWebSocketServer(server) {
 /**
  * Broadcast event to all clients subscribed to a feature
  */
-export function broadcastToFeature(featureId, event) {
+function broadcastToFeature(featureId, event) {
     let count = 0;
     for (const [clientId, client] of clients.entries()) {
-        if (client.featureId === featureId && client.ws.readyState === WebSocket.OPEN) {
+        if (client.featureId === featureId && client.ws.readyState === ws_1.WebSocket.OPEN) {
             try {
                 client.ws.send(JSON.stringify(event));
                 count++;
@@ -102,10 +108,10 @@ export function broadcastToFeature(featureId, event) {
 /**
  * Broadcast event to all clients in a project
  */
-export function broadcastToProject(projectId, event) {
+function broadcastToProject(projectId, event) {
     let count = 0;
     for (const [clientId, client] of clients.entries()) {
-        if (client.projectId === projectId && client.ws.readyState === WebSocket.OPEN) {
+        if (client.projectId === projectId && client.ws.readyState === ws_1.WebSocket.OPEN) {
             try {
                 client.ws.send(JSON.stringify(event));
                 count++;
@@ -122,6 +128,6 @@ export function broadcastToProject(projectId, event) {
 /**
  * Get active connections count
  */
-export function getActiveConnections() {
+function getActiveConnections() {
     return clients.size;
 }

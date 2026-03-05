@@ -186,12 +186,15 @@ model Sprint {
   projectId       String
   project         Project       @relation(fields: [projectId], references: [id])
   number          Int
+  sprintNumber    Int? // alias para number
   goal            String
   status          String        @default("PLANNING") // PLANNING | ACTIVE | REVIEW | DONE
   startDate       DateTime?
   endDate         DateTime?
   plannedPoints   Int           @default(0)
   deliveredPoints Int           @default(0)
+  velocity        Float         @default(0)
+  capacity        Int           @default(0)
   features        Feature[]
   dailyReports    DailyReport[]
   createdAt       DateTime      @default(now())
@@ -208,6 +211,7 @@ model Feature {
   title              String
   description        String
   acceptanceCriteria String        @default("[]")
+  technicalPlan      Json? // Plano técnico do Architect Agent
   type               String        @default("FEATURE") // FEATURE | FIX | HOTFIX | REFACTOR
   status             String        @default("BACKLOG") // BACKLOG | READY | IN_PROGRESS | IN_REVIEW | IN_QA | DONE | BLOCKED
   priority           String        @default("MEDIUM") // CRITICAL | HIGH | MEDIUM | LOW

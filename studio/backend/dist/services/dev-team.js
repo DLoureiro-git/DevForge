@@ -1,3 +1,4 @@
+"use strict";
 /**
  * DEV TEAM ORCHESTRATOR
  *
@@ -7,20 +8,22 @@
  * - Database Dev (Prisma schema)
  * - Utils Dev (contexts, hooks, utils)
  */
-import { FrontendDev } from './devs/frontend-dev';
-import { BackendDev } from './devs/backend-dev';
-import { DatabaseDev } from './devs/database-dev';
-import { UtilsDev } from './devs/utils-dev';
-export class DevTeam {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.devTeam = exports.DevTeam = void 0;
+const frontend_dev_1 = require("./devs/frontend-dev");
+const backend_dev_1 = require("./devs/backend-dev");
+const database_dev_1 = require("./devs/database-dev");
+const utils_dev_1 = require("./devs/utils-dev");
+class DevTeam {
     frontendDev;
     backendDev;
     databaseDev;
     utilsDev;
     constructor() {
-        this.frontendDev = new FrontendDev();
-        this.backendDev = new BackendDev();
-        this.databaseDev = new DatabaseDev();
-        this.utilsDev = new UtilsDev();
+        this.frontendDev = new frontend_dev_1.FrontendDev();
+        this.backendDev = new backend_dev_1.BackendDev();
+        this.databaseDev = new database_dev_1.DatabaseDev();
+        this.utilsDev = new utils_dev_1.UtilsDev();
     }
     /**
      * Parse ARCHITECTURE.md e atribuir ficheiros aos devs corretos
@@ -314,5 +317,6 @@ ${JSON.stringify(request.architecture, null, 2)}
         return 'frontend';
     }
 }
+exports.DevTeam = DevTeam;
 // Singleton instance
-export const devTeam = new DevTeam();
+exports.devTeam = new DevTeam();

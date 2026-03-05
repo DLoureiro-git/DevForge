@@ -1,9 +1,12 @@
+"use strict";
 /**
  * FRONTEND DEVELOPER AGENT
  * Especializado em: React, Next.js, Tailwind CSS, UI/UX
  */
-import { ollama } from '../../lib/ollama';
-import { getModelForDev, getOllamaOptions, devLog } from './dev-config';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.FrontendDev = void 0;
+const ollama_1 = require("../../lib/ollama");
+const dev_config_1 = require("./dev-config");
 const FRONTEND_DEV_SYSTEM_PROMPT = `Você é um Frontend Developer especializado em React + Next.js + TailwindCSS.
 
 Sua responsabilidade:
@@ -33,10 +36,10 @@ FORMATO DE OUTPUT:
 Retorne APENAS o código do ficheiro, sem explicações extras.
 Inclua imports, exports, e código completo pronto para usar.
 NÃO incluir markdown code blocks (sem \`\`\`).`;
-export class FrontendDev {
+class FrontendDev {
     model;
     constructor(model) {
-        this.model = model || getModelForDev('frontend');
+        this.model = model || (0, dev_config_1.getModelForDev)('frontend');
     }
     async generateCode(request) {
         const startTime = Date.now();
@@ -55,11 +58,11 @@ Descrição: ${request.fileDescription}
 
 Implemente o código completo para este ficheiro seguindo a arquitectura e regras técnicas.
 Retorne APENAS o código, sem markdown code blocks, sem explicações.`;
-            devLog(`[Frontend] Gerando ${request.filePath}...`);
+            (0, dev_config_1.devLog)(`[Frontend] Gerando ${request.filePath}...`);
             // Gerar código
-            const rawCode = await ollama.generate(this.model, prompt, FRONTEND_DEV_SYSTEM_PROMPT, getOllamaOptions());
+            const rawCode = await ollama_1.ollama.generate(this.model, prompt, FRONTEND_DEV_SYSTEM_PROMPT, (0, dev_config_1.getOllamaOptions)());
             // Limpar markdown code blocks se existirem
-            const code = ollama.removeMarkdownCodeBlocks(rawCode).trim();
+            const code = ollama_1.ollama.removeMarkdownCodeBlocks(rawCode).trim();
             return {
                 success: true,
                 code,
@@ -77,3 +80,4 @@ Retorne APENAS o código, sem markdown code blocks, sem explicações.`;
         }
     }
 }
+exports.FrontendDev = FrontendDev;

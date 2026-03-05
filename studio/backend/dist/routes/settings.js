@@ -1,17 +1,19 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 // DevForge V2 — Settings Routes
-import { Router } from 'express';
-import { prisma } from '../lib/prisma.js';
-import { requireAuth } from '../middleware/auth.js';
-const router = Router();
+const express_1 = require("express");
+const prisma_js_1 = require("../lib/prisma.js");
+const auth_js_1 = require("../middleware/auth.js");
+const router = (0, express_1.Router)();
 // GET /api/settings
-router.get('/', requireAuth, async (req, res, next) => {
+router.get('/', auth_js_1.requireAuth, async (req, res, next) => {
     try {
-        let settings = await prisma.settings.findUnique({
+        let settings = await prisma_js_1.prisma.settings.findUnique({
             where: { userId: req.user.id },
         });
         if (!settings) {
             // Create default settings
-            settings = await prisma.settings.create({
+            settings = await prisma_js_1.prisma.settings.create({
                 data: {
                     userId: req.user.id,
                 },
@@ -29,7 +31,7 @@ router.get('/', requireAuth, async (req, res, next) => {
     }
 });
 // PUT /api/settings
-router.put('/', requireAuth, async (req, res, next) => {
+router.put('/', auth_js_1.requireAuth, async (req, res, next) => {
     try {
         const { anthropicKey, ollamaUrl, ollamaModelDev, ollamaModelFix, outputDirectory, notifyEmail, notifyDesktop, deployTarget, } = req.body;
         const data = {};
@@ -49,7 +51,7 @@ router.put('/', requireAuth, async (req, res, next) => {
             data.notifyDesktop = notifyDesktop;
         if (deployTarget !== undefined)
             data.deployTarget = deployTarget;
-        const settings = await prisma.settings.upsert({
+        const settings = await prisma_js_1.prisma.settings.upsert({
             where: { userId: req.user.id },
             update: data,
             create: {
@@ -68,4 +70,4 @@ router.put('/', requireAuth, async (req, res, next) => {
         next(error);
     }
 });
-export default router;
+exports.default = router;

@@ -1,3 +1,4 @@
+"use strict";
 /**
  * FEATURE ORCHESTRATOR — Pipeline para Features (FASE 4)
  *
@@ -17,20 +18,59 @@
  * WebSocket Streaming: PHASE_CHANGED, LOG_APPENDED, FEATURE_UPDATED
  * DB Updates: agentProgress, status, logs, bugs, qaScore
  */
-import { PrismaClient } from '@prisma/client';
-import Anthropic from '@anthropic-ai/sdk';
-import { execSync } from 'child_process';
-import { existsSync } from 'fs';
-import { join } from 'path';
-import { ArchitectAgent } from './architect';
-import { DevTeam } from './dev-team';
-import { executeQA } from './qa-executor';
-import { runBatchBugFix } from './bug-fix-loop';
-const prisma = new PrismaClient();
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.FeaturePipeline = void 0;
+exports.runFeaturePipeline = runFeaturePipeline;
+const client_1 = require("@prisma/client");
+const sdk_1 = __importDefault(require("@anthropic-ai/sdk"));
+const child_process_1 = require("child_process");
+const fs_1 = require("fs");
+const path_1 = require("path");
+const architect_1 = require("./architect");
+const dev_team_1 = require("./dev-team");
+const qa_executor_1 = require("./qa-executor");
+const bug_fix_loop_1 = require("./bug-fix-loop");
+const prisma = new client_1.PrismaClient();
 // ============================================================================
 // FEATURE PIPELINE CLASS
 // ============================================================================
-export class FeaturePipeline {
+class FeaturePipeline {
     config;
     phases = [];
     startTime = 0;
@@ -46,7 +86,7 @@ export class FeaturePipeline {
             targetQAScore: config.targetQAScore || 95,
             ...config
         };
-        this.claudeClient = new Anthropic({ apiKey: this.config.claudeApiKey });
+        this.claudeClient = new sdk_1.default({ apiKey: this.config.claudeApiKey });
     }
     /**
      * Registar callback para WebSocket events
@@ -59,7 +99,7 @@ export class FeaturePipeline {
      */
     setupWebSocketBroadcasting() {
         // Importar broadcast function
-        import('../lib/websocket.js').then(({ broadcastToFeature }) => {
+        Promise.resolve().then(() => __importStar(require('../lib/websocket.js'))).then(({ broadcastToFeature }) => {
             this.onWebSocketEvent((event) => {
                 broadcastToFeature(this.config.featureId, event);
             });
@@ -119,7 +159,7 @@ export class FeaturePipeline {
             await this.startPhase('ARCHITECT');
             this.emitPhaseChange('ARCHITECT');
             this.log('INFO', '🏗️  Architect Agent a gerar plano técnico...', 'ARCHITECT');
-            const architectAgent = new ArchitectAgent();
+            const architectAgent = new architect_1.ArchitectAgent();
             const technicalPlan = await architectAgent.generateFeaturePlan(feature, acceptanceCriteria, project.architecture);
             this.log('SUCCESS', '✅ Plano técnico gerado', 'ARCHITECT');
             await this.completePhase('ARCHITECT', { technicalPlan });
@@ -133,14 +173,14 @@ export class FeaturePipeline {
             // BRANCH ISOLATION — Criar branch feat/{featureId}
             // ========================================================================
             const branchName = `feat/${this.config.featureId}`;
-            const outputPath = join(this.config.outputDirectory, this.config.projectId);
-            if (!existsSync(outputPath)) {
+            const outputPath = (0, path_1.join)(this.config.outputDirectory, this.config.projectId);
+            if (!(0, fs_1.existsSync)(outputPath)) {
                 throw new Error(`Output path não existe: ${outputPath}`);
             }
             this.log('INFO', `🌿 A criar branch: ${branchName}`, 'ARCHITECT');
             try {
                 // Criar branch
-                execSync(`git checkout -b ${branchName}`, { cwd: outputPath });
+                (0, child_process_1.execSync)(`git checkout -b ${branchName}`, { cwd: outputPath });
                 // Guardar branch na DB
                 await prisma.feature.update({
                     where: { id: this.config.featureId },
@@ -158,7 +198,7 @@ export class FeaturePipeline {
             await this.startPhase('DEV_TEAM');
             this.emitPhaseChange('DEV_TEAM');
             this.log('INFO', '👨‍💻 Dev Team a gerar código (4 agentes em paralelo)...', 'DEV_TEAM');
-            const devTeam = new DevTeam();
+            const devTeam = new dev_team_1.DevTeam();
             const codeResult = await devTeam.executeFeature({
                 feature,
                 technicalPlan,
@@ -174,7 +214,7 @@ export class FeaturePipeline {
             await this.startPhase('QA');
             this.emitPhaseChange('QA');
             this.log('INFO', '🔍 QA Agent a executar validações...', 'QA');
-            const qaResults = await executeQA({
+            const qaResults = await (0, qa_executor_1.executeQA)({
                 prd: JSON.stringify(project.prd),
                 projectPath: outputPath,
                 headless: true,
@@ -213,18 +253,18 @@ export class FeaturePipeline {
                 while (iteration < this.config.maxFixIterations && finalQAScore < this.config.targetQAScore) {
                     iteration++;
                     this.log('INFO', `🔧 Fix Loop iteração ${iteration}/${this.config.maxFixIterations} (QA: ${finalQAScore}%)`, 'FIX_LOOP');
-                    const bugFixResults = await runBatchBugFix(qaResults.allBugs, qaResults.checklist, {
+                    const bugFixResults = await (0, bug_fix_loop_1.runBatchBugFix)(qaResults.allBugs, qaResults.checklist, {
                         maxIterations: 1,
                         ollamaModel: this.config.ollamaModel,
                         ollamaEndpoint: this.config.ollamaEndpoint,
                         claudeApiKey: this.config.claudeApiKey,
                         projectPath: outputPath,
-                        browser: await (await import('playwright')).chromium.launch({ headless: true })
+                        browser: await (await Promise.resolve().then(() => __importStar(require('playwright')))).chromium.launch({ headless: true })
                     });
                     const fixed = bugFixResults.filter((r) => r.fixed).length;
                     this.log('INFO', `✅ ${fixed}/${qaResults.allBugs.length} bugs corrigidos nesta iteração`, 'FIX_LOOP');
                     // Re-executar QA
-                    const newQAResults = await executeQA({
+                    const newQAResults = await (0, qa_executor_1.executeQA)({
                         prd: JSON.stringify(project.prd),
                         projectPath: outputPath,
                         headless: true,
@@ -265,12 +305,12 @@ export class FeaturePipeline {
             this.log('INFO', '📦 A fazer commit das alterações...', 'DEPLOY');
             try {
                 // Git add
-                execSync('git add .', { cwd: outputPath });
+                (0, child_process_1.execSync)('git add .', { cwd: outputPath });
                 // Git commit
                 const commitMessage = `feat: ${feature.title}\n\n${feature.description}\n\nQA Score: ${finalQAScore}%`;
-                execSync(`git commit -m "${commitMessage}"`, { cwd: outputPath });
+                (0, child_process_1.execSync)(`git commit -m "${commitMessage}"`, { cwd: outputPath });
                 // Git push
-                execSync(`git push -u origin ${branchName}`, { cwd: outputPath });
+                (0, child_process_1.execSync)(`git push -u origin ${branchName}`, { cwd: outputPath });
                 this.log('SUCCESS', `✅ Commit & push concluído: ${branchName}`, 'DEPLOY');
             }
             catch (error) {
@@ -484,13 +524,14 @@ Regras:
         }
     }
 }
+exports.FeaturePipeline = FeaturePipeline;
 // ============================================================================
 // HELPER FUNCTION
 // ============================================================================
 /**
  * Helper para executar pipeline standalone
  */
-export async function runFeaturePipeline(config) {
+async function runFeaturePipeline(config) {
     const pipeline = new FeaturePipeline(config);
     return pipeline.run();
 }

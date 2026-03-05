@@ -1,9 +1,15 @@
+"use strict";
 /**
  * DEV TEAM CONFIGURATION
  *
  * Configuração centralizada para todos os developers
  */
-export const DEV_CONFIG = {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DEV_CONFIG = void 0;
+exports.getModelForDev = getModelForDev;
+exports.getOllamaOptions = getOllamaOptions;
+exports.devLog = devLog;
+exports.DEV_CONFIG = {
     // Modelo Ollama padrão
     defaultModel: process.env.OLLAMA_DEV_MODEL || 'qwen2.5-coder:32b',
     // Timeout para geração (ms)
@@ -27,23 +33,23 @@ export const DEV_CONFIG = {
 /**
  * Obter modelo para um dev específico
  */
-export function getModelForDev(devRole) {
-    return DEV_CONFIG.devModels[devRole] || DEV_CONFIG.defaultModel;
+function getModelForDev(devRole) {
+    return exports.DEV_CONFIG.devModels[devRole] || exports.DEV_CONFIG.defaultModel;
 }
 /**
  * Obter configuração Ollama options
  */
-export function getOllamaOptions() {
+function getOllamaOptions() {
     return {
-        temperature: DEV_CONFIG.temperature,
-        top_p: DEV_CONFIG.topP
+        temperature: exports.DEV_CONFIG.temperature,
+        top_p: exports.DEV_CONFIG.topP
     };
 }
 /**
  * Log se verbose mode activo
  */
-export function devLog(message, data) {
-    if (DEV_CONFIG.verbose) {
+function devLog(message, data) {
+    if (exports.DEV_CONFIG.verbose) {
         console.log(`[DevTeam] ${message}`, data || '');
     }
 }

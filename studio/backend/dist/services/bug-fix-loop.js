@@ -1,3 +1,4 @@
+"use strict";
 /**
  * DevForge V2 - Bug Fix Loop com Escalonamento Inteligente
  *
@@ -7,10 +8,49 @@
  *
  * Re-run inteligente: apenas checks relevantes aos ficheiros alterados
  */
-import { execSync } from 'child_process';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { join } from 'path';
-import Anthropic from '@anthropic-ai/sdk';
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.runBugFixLoop = runBugFixLoop;
+exports.runBatchBugFix = runBatchBugFix;
+const child_process_1 = require("child_process");
+const fs_1 = require("fs");
+const path_1 = require("path");
+const sdk_1 = __importDefault(require("@anthropic-ai/sdk"));
 // ============================================================================
 // CONSTANTS
 // ============================================================================
@@ -35,7 +75,7 @@ const CHECK_TO_FILES_MAP = {
 // ============================================================================
 // BUG FIX LOOP
 // ============================================================================
-export async function runBugFixLoop(bug, checks, config) {
+async function runBugFixLoop(bug, checks, config) {
     const fullConfig = { ...DEFAULT_CONFIG, ...config };
     const attempts = [];
     let currentBug = bug;
@@ -158,7 +198,7 @@ async function generateFixClaude(prompt, model, config) {
         console.error('Claude API key não configurada');
         return null;
     }
-    const anthropic = new Anthropic({ apiKey: config.claudeApiKey });
+    const anthropic = new sdk_1.default({ apiKey: config.claudeApiKey });
     const modelName = model === 'haiku' ? 'claude-3-5-haiku-20241022' : 'claude-3-5-sonnet-20241022';
     try {
         const message = await anthropic.messages.create({
@@ -195,15 +235,15 @@ async function applyFix(fix, projectPath) {
         if (line.startsWith('--- ') || line.startsWith('+++ ')) {
             const match = line.match(/[ab]\/(.*)/);
             if (match) {
-                const filePath = join(projectPath, match[1]);
+                const filePath = (0, path_1.join)(projectPath, match[1]);
                 // Gravar ficheiro anterior se existir
                 if (currentFile && fileContent.length > 0) {
-                    writeFileSync(currentFile, fileContent.join('\n'));
+                    (0, fs_1.writeFileSync)(currentFile, fileContent.join('\n'));
                     filesChanged.push(currentFile);
                 }
                 currentFile = filePath;
-                if (existsSync(filePath)) {
-                    fileContent = readFileSync(filePath, 'utf-8').split('\n');
+                if ((0, fs_1.existsSync)(filePath)) {
+                    fileContent = (0, fs_1.readFileSync)(filePath, 'utf-8').split('\n');
                 }
                 else {
                     fileContent = [];
@@ -225,7 +265,7 @@ async function applyFix(fix, projectPath) {
     }
     // Gravar último ficheiro
     if (currentFile && fileContent.length > 0) {
-        writeFileSync(currentFile, fileContent.join('\n'));
+        (0, fs_1.writeFileSync)(currentFile, fileContent.join('\n'));
         filesChanged.push(currentFile);
     }
     return filesChanged;
@@ -235,7 +275,7 @@ async function applyFix(fix, projectPath) {
 // ============================================================================
 function revertChanges(files, projectPath) {
     try {
-        execSync('git checkout HEAD -- ' + files.join(' '), {
+        (0, child_process_1.execSync)('git checkout HEAD -- ' + files.join(' '), {
             cwd: projectPath,
             stdio: 'pipe',
         });
@@ -290,13 +330,13 @@ async function rerunChecks(checks, config) {
 }
 async function loadValidators() {
     const modules = await Promise.all([
-        import('./validators/deploy-validators'),
-        import('./validators/responsive-validators'),
-        import('./validators/db-validators'),
-        import('./validators/auth-validators'),
-        import('./validators/form-validators'),
-        import('./validators/button-validators'),
-        import('./validators/code-validators'),
+        Promise.resolve().then(() => __importStar(require('./validators/deploy-validators'))),
+        Promise.resolve().then(() => __importStar(require('./validators/responsive-validators'))),
+        Promise.resolve().then(() => __importStar(require('./validators/db-validators'))),
+        Promise.resolve().then(() => __importStar(require('./validators/auth-validators'))),
+        Promise.resolve().then(() => __importStar(require('./validators/form-validators'))),
+        Promise.resolve().then(() => __importStar(require('./validators/button-validators'))),
+        Promise.resolve().then(() => __importStar(require('./validators/code-validators'))),
     ]);
     const validators = {};
     for (const module of modules) {
@@ -320,8 +360,8 @@ function buildFixPrompt(bug, projectPath) {
     if (bug.affectedFiles && bug.affectedFiles.length > 0) {
         prompt += `\n**FICHEIROS AFETADOS:**\n`;
         for (const file of bug.affectedFiles.slice(0, 3)) {
-            if (existsSync(file)) {
-                const content = readFileSync(file, 'utf-8');
+            if ((0, fs_1.existsSync)(file)) {
+                const content = (0, fs_1.readFileSync)(file, 'utf-8');
                 const lines = content.split('\n').slice(0, 100).join('\n');
                 prompt += `\n### ${file}\n\`\`\`typescript\n${lines}\n\`\`\`\n`;
             }
@@ -352,7 +392,7 @@ Retorne APENAS o diff no formato:
 // ============================================================================
 // BATCH FIX
 // ============================================================================
-export async function runBatchBugFix(bugs, checks, config) {
+async function runBatchBugFix(bugs, checks, config) {
     const results = [];
     // Ordenar por severidade
     const sortedBugs = [...bugs].sort((a, b) => {

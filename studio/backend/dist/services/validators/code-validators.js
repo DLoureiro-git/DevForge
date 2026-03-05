@@ -1,13 +1,19 @@
+"use strict";
 /**
  * Code Validators - Categoria G: Qualidade de Código
  */
-import { execSync } from 'child_process';
-import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
-import { join } from 'path';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.validateImports = validateImports;
+exports.validateTypeScript = validateTypeScript;
+exports.validateNoHardcodedSecrets = validateNoHardcodedSecrets;
+exports.validateNoConsoleLogs = validateNoConsoleLogs;
+const child_process_1 = require("child_process");
+const fs_1 = require("fs");
+const path_1 = require("path");
 // ============================================================================
 // G1: IMPORTS VALIDATION
 // ============================================================================
-export async function validateImports(browser, projectPath) {
+async function validateImports(browser, projectPath) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'code-001';
@@ -16,7 +22,7 @@ export async function validateImports(browser, projectPath) {
         const codeFiles = findCodeFiles(projectPath);
         const brokenImports = [];
         for (const file of codeFiles) {
-            const content = readFileSync(file, 'utf-8');
+            const content = (0, fs_1.readFileSync)(file, 'utf-8');
             // Regex para imports
             const importRegex = /import\s+.*?from\s+['"]([^'"]+)['"]/g;
             let match;
@@ -28,7 +34,7 @@ export async function validateImports(browser, projectPath) {
                     continue;
                 // Resolver caminho relativo
                 const resolvedPath = resolveImportPath(file, importPath);
-                if (!existsSync(resolvedPath)) {
+                if (!(0, fs_1.existsSync)(resolvedPath)) {
                     fileImports.push(importPath);
                 }
             }
@@ -47,7 +53,7 @@ export async function validateImports(browser, projectPath) {
                 title: `${brokenImports.length} ficheiros com imports quebrados`,
                 description: JSON.stringify(brokenImports.slice(0, 10), null, 2),
                 location: projectPath,
-                affectedFiles: brokenImports.map(b => join(projectPath, b.file)),
+                affectedFiles: brokenImports.map(b => (0, path_1.join)(projectPath, b.file)),
                 reproducible: true,
                 foundAt: new Date(),
             });
@@ -76,13 +82,13 @@ export async function validateImports(browser, projectPath) {
 // ============================================================================
 // G2: TYPESCRIPT VALIDATION
 // ============================================================================
-export async function validateTypeScript(browser, projectPath) {
+async function validateTypeScript(browser, projectPath) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'code-002';
     try {
-        const tsconfigPath = join(projectPath, 'tsconfig.json');
-        if (!existsSync(tsconfigPath)) {
+        const tsconfigPath = (0, path_1.join)(projectPath, 'tsconfig.json');
+        if (!(0, fs_1.existsSync)(tsconfigPath)) {
             bugs.push({
                 id: `${checkId}-no-tsconfig`,
                 checkId,
@@ -103,7 +109,7 @@ export async function validateTypeScript(browser, projectPath) {
         }
         // Executar tsc --noEmit
         try {
-            execSync('npx tsc --noEmit', {
+            (0, child_process_1.execSync)('npx tsc --noEmit', {
                 cwd: projectPath,
                 timeout: 60000,
                 stdio: 'pipe',
@@ -129,7 +135,7 @@ export async function validateTypeScript(browser, projectPath) {
             }
         }
         // Verificar se strict mode está ativo
-        const tsconfigContent = JSON.parse(readFileSync(tsconfigPath, 'utf-8'));
+        const tsconfigContent = JSON.parse((0, fs_1.readFileSync)(tsconfigPath, 'utf-8'));
         if (!tsconfigContent.compilerOptions?.strict) {
             bugs.push({
                 id: `${checkId}-no-strict`,
@@ -167,7 +173,7 @@ export async function validateTypeScript(browser, projectPath) {
 // ============================================================================
 // G3: NO HARDCODED SECRETS
 // ============================================================================
-export async function validateNoHardcodedSecrets(browser, projectPath) {
+async function validateNoHardcodedSecrets(browser, projectPath) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'code-003';
@@ -186,7 +192,7 @@ export async function validateNoHardcodedSecrets(browser, projectPath) {
             // Ignorar node_modules
             if (file.includes('node_modules'))
                 continue;
-            const content = readFileSync(file, 'utf-8');
+            const content = (0, fs_1.readFileSync)(file, 'utf-8');
             const fileSecrets = [];
             for (const pattern of secretPatterns) {
                 const matches = content.match(pattern);
@@ -221,7 +227,7 @@ export async function validateNoHardcodedSecrets(browser, projectPath) {
                 title: `${secretsFound.length} ficheiros com possíveis segredos hardcoded`,
                 description: JSON.stringify(secretsFound, null, 2),
                 location: projectPath,
-                affectedFiles: secretsFound.map(s => join(projectPath, s.file)),
+                affectedFiles: secretsFound.map(s => (0, path_1.join)(projectPath, s.file)),
                 reproducible: true,
                 foundAt: new Date(),
             });
@@ -250,7 +256,7 @@ export async function validateNoHardcodedSecrets(browser, projectPath) {
 // ============================================================================
 // G4: NO CONSOLE.LOG IN PRODUCTION
 // ============================================================================
-export async function validateNoConsoleLogs(browser, projectPath) {
+async function validateNoConsoleLogs(browser, projectPath) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'code-004';
@@ -265,7 +271,7 @@ export async function validateNoConsoleLogs(browser, projectPath) {
                 file.includes('dev.')) {
                 continue;
             }
-            const content = readFileSync(file, 'utf-8');
+            const content = (0, fs_1.readFileSync)(file, 'utf-8');
             const consoleMatches = content.match(/console\.(log|warn|error|debug|info)\(/g);
             if (consoleMatches && consoleMatches.length > 0) {
                 filesWithConsole.push({
@@ -282,7 +288,7 @@ export async function validateNoConsoleLogs(browser, projectPath) {
                 title: `${filesWithConsole.length} ficheiros com console.log`,
                 description: `Total: ${filesWithConsole.reduce((acc, f) => acc + f.count, 0)} console statements\n\n${JSON.stringify(filesWithConsole.slice(0, 10), null, 2)}`,
                 location: projectPath,
-                affectedFiles: filesWithConsole.slice(0, 20).map(f => join(projectPath, f.file)),
+                affectedFiles: filesWithConsole.slice(0, 20).map(f => (0, path_1.join)(projectPath, f.file)),
                 reproducible: true,
                 foundAt: new Date(),
             });
@@ -313,14 +319,14 @@ export async function validateNoConsoleLogs(browser, projectPath) {
 // ============================================================================
 function findCodeFiles(dir, files = []) {
     try {
-        const items = readdirSync(dir);
+        const items = (0, fs_1.readdirSync)(dir);
         for (const item of items) {
-            const fullPath = join(dir, item);
+            const fullPath = (0, path_1.join)(dir, item);
             // Ignorar pastas
             if (item === 'node_modules' || item === '.next' || item === 'dist' || item === 'build' || item === '.git') {
                 continue;
             }
-            const stat = statSync(fullPath);
+            const stat = (0, fs_1.statSync)(fullPath);
             if (stat.isDirectory()) {
                 findCodeFiles(fullPath, files);
             }
@@ -336,12 +342,12 @@ function findCodeFiles(dir, files = []) {
 }
 function resolveImportPath(currentFile, importPath) {
     const currentDir = currentFile.substring(0, currentFile.lastIndexOf('/'));
-    let resolved = join(currentDir, importPath);
+    let resolved = (0, path_1.join)(currentDir, importPath);
     // Tentar com extensões
     const extensions = ['', '.ts', '.tsx', '.js', '.jsx', '/index.ts', '/index.tsx', '/index.js', '/index.jsx'];
     for (const ext of extensions) {
         const fullPath = resolved + ext;
-        if (existsSync(fullPath)) {
+        if ((0, fs_1.existsSync)(fullPath)) {
             return fullPath;
         }
     }

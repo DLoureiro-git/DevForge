@@ -1,11 +1,17 @@
+"use strict";
 /**
  * PM AGENT — O Coração do DevForge
  *
  * Consultor de produto que conduz intake inteligente
  * com árvore de decisão e linguagem não-técnica.
  */
-import Anthropic from '@anthropic-ai/sdk';
-import { createAnthropicClient } from '../lib/anthropic';
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PMAgent = void 0;
+const sdk_1 = __importDefault(require("@anthropic-ai/sdk"));
+const anthropic_1 = require("../lib/anthropic");
 // Árvore de decisão — perguntas do PM Agent
 const QUESTION_TREE = [
     // OBRIGATÓRIAS (sempre faz, nesta ordem)
@@ -123,14 +129,14 @@ Se não, reformula a pergunta de forma mais clara.
 Depois, determina qual é a próxima pergunta relevante e faz-a.
 
 NÃO geres PRD até receberes confirmação explícita do utilizador após o resumo final.`;
-export class PMAgent {
+class PMAgent {
     client;
     answers = {};
     currentQuestionIndex = 0;
     constructor(apiKey) {
         this.client = apiKey
-            ? createAnthropicClient(apiKey)
-            : new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+            ? (0, anthropic_1.createAnthropicClient)(apiKey)
+            : new sdk_1.default({ apiKey: process.env.ANTHROPIC_API_KEY });
     }
     /**
      * Processar mensagem do utilizador no fluxo de intake
@@ -422,3 +428,4 @@ Schema exacto:
         return JSON.parse(text.replace(/```json\n?|\n?```/g, ''));
     }
 }
+exports.PMAgent = PMAgent;

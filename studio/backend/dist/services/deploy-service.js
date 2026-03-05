@@ -1,3 +1,4 @@
+"use strict";
 /**
  * DEPLOY SERVICE — Deploy Automático
  *
@@ -6,13 +7,19 @@
  * - Railway (database + backend se necessário)
  * - GitHub repo creation
  */
-import { execSync } from 'child_process';
-import { writeFileSync } from 'fs';
-import { join } from 'path';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DeployService = void 0;
+exports.deployToVercel = deployToVercel;
+exports.deployToRailway = deployToRailway;
+exports.createGitHubRepo = createGitHubRepo;
+exports.deployComplete = deployComplete;
+const child_process_1 = require("child_process");
+const fs_1 = require("fs");
+const path_1 = require("path");
 // ============================================================================
 // DEPLOY SERVICE
 // ============================================================================
-export class DeployService {
+class DeployService {
     logs = [];
     /**
      * Deploy para Vercel
@@ -23,24 +30,24 @@ export class DeployService {
             this.log('🚀 Iniciando deploy para Vercel...');
             // Verificar se Vercel CLI está instalado
             try {
-                execSync('vercel --version', { stdio: 'pipe' });
+                (0, child_process_1.execSync)('vercel --version', { stdio: 'pipe' });
             }
             catch {
                 throw new Error('Vercel CLI não instalado. Executar: npm i -g vercel');
             }
             // Criar .env.production.local com env vars
-            const envPath = join(config.projectPath, '.env.production.local');
+            const envPath = (0, path_1.join)(config.projectPath, '.env.production.local');
             const envContent = Object.entries(config.envVars)
                 .map(([key, value]) => `${key}="${value}"`)
                 .join('\n');
-            writeFileSync(envPath, envContent, 'utf-8');
+            (0, fs_1.writeFileSync)(envPath, envContent, 'utf-8');
             this.log('✅ Variáveis de ambiente configuradas');
             // Deploy com Vercel CLI
             this.log('📦 Executando deploy...');
             const deployCmd = config.vercelToken
                 ? `vercel --prod --token=${config.vercelToken} --yes`
                 : `vercel --prod --yes`;
-            const output = execSync(deployCmd, {
+            const output = (0, child_process_1.execSync)(deployCmd, {
                 cwd: config.projectPath,
                 encoding: 'utf-8'
             });
@@ -81,14 +88,14 @@ export class DeployService {
             this.log('🚀 Iniciando deploy para Railway...');
             // Verificar Railway CLI
             try {
-                execSync('railway --version', { stdio: 'pipe' });
+                (0, child_process_1.execSync)('railway --version', { stdio: 'pipe' });
             }
             catch {
                 throw new Error('Railway CLI não instalado. Executar: npm i -g @railway/cli');
             }
             // Login (se tiver token)
             if (config.railwayToken) {
-                execSync(`railway login --token ${config.railwayToken}`, {
+                (0, child_process_1.execSync)(`railway login --token ${config.railwayToken}`, {
                     cwd: config.projectPath,
                     stdio: 'pipe'
                 });
@@ -96,20 +103,20 @@ export class DeployService {
             }
             // Criar projecto
             const projectName = config.projectName.toLowerCase().replace(/\s+/g, '-');
-            execSync(`railway init -n ${projectName}`, {
+            (0, child_process_1.execSync)(`railway init -n ${projectName}`, {
                 cwd: config.projectPath,
                 stdio: 'pipe'
             });
             this.log(`✅ Projecto "${projectName}" criado`);
             // Adicionar PostgreSQL
-            execSync('railway add --database postgresql', {
+            (0, child_process_1.execSync)('railway add --database postgresql', {
                 cwd: config.projectPath,
                 stdio: 'pipe'
             });
             this.log('✅ PostgreSQL adicionado');
             // Configurar env vars
             for (const [key, value] of Object.entries(config.envVars)) {
-                execSync(`railway variables set ${key}="${value}"`, {
+                (0, child_process_1.execSync)(`railway variables set ${key}="${value}"`, {
                     cwd: config.projectPath,
                     stdio: 'pipe'
                 });
@@ -117,12 +124,12 @@ export class DeployService {
             this.log('✅ Variáveis de ambiente configuradas');
             // Deploy
             this.log('📦 Executando deploy...');
-            const output = execSync('railway up --detach', {
+            const output = (0, child_process_1.execSync)('railway up --detach', {
                 cwd: config.projectPath,
                 encoding: 'utf-8'
             });
             // Obter URL do deployment
-            const urlOutput = execSync('railway domain', {
+            const urlOutput = (0, child_process_1.execSync)('railway domain', {
                 cwd: config.projectPath,
                 encoding: 'utf-8'
             });
@@ -183,20 +190,20 @@ export class DeployService {
             // Inicializar git local
             this.log('📝 Inicializando git local...');
             try {
-                execSync('git init', { cwd: config.projectPath, stdio: 'pipe' });
-                execSync('git add .', { cwd: config.projectPath, stdio: 'pipe' });
-                execSync('git commit -m "Initial commit from DevForge V2"', {
+                (0, child_process_1.execSync)('git init', { cwd: config.projectPath, stdio: 'pipe' });
+                (0, child_process_1.execSync)('git add .', { cwd: config.projectPath, stdio: 'pipe' });
+                (0, child_process_1.execSync)('git commit -m "Initial commit from DevForge V2"', {
                     cwd: config.projectPath,
                     stdio: 'pipe'
                 });
-                execSync(`git branch -M main`, { cwd: config.projectPath, stdio: 'pipe' });
-                execSync(`git remote add origin ${gitUrl}`, {
+                (0, child_process_1.execSync)(`git branch -M main`, { cwd: config.projectPath, stdio: 'pipe' });
+                (0, child_process_1.execSync)(`git remote add origin ${gitUrl}`, {
                     cwd: config.projectPath,
                     stdio: 'pipe'
                 });
                 // Configurar credenciais para push
                 const authenticatedUrl = gitUrl.replace('https://', `https://${config.githubToken}@`);
-                execSync(`git push -u origin main`, {
+                (0, child_process_1.execSync)(`git push -u origin main`, {
                     cwd: config.projectPath,
                     stdio: 'pipe',
                     env: {
@@ -295,22 +302,23 @@ export class DeployService {
         console.log(message);
     }
 }
+exports.DeployService = DeployService;
 /**
  * Helpers standalone
  */
-export async function deployToVercel(config) {
+async function deployToVercel(config) {
     const service = new DeployService();
     return service.deployToVercel(config);
 }
-export async function deployToRailway(config) {
+async function deployToRailway(config) {
     const service = new DeployService();
     return service.deployToRailway(config);
 }
-export async function createGitHubRepo(config) {
+async function createGitHubRepo(config) {
     const service = new DeployService();
     return service.createGitHubRepo(config);
 }
-export async function deployComplete(config) {
+async function deployComplete(config) {
     const service = new DeployService();
     return service.deployComplete(config);
 }

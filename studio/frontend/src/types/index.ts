@@ -1,3 +1,10 @@
+// FASE 5 Types - Export all
+export * from './sprint'
+export * from './pipeline'
+export * from './team'
+export * from './chat'
+
+// Original types (backend)
 export interface Message {
   id: string
   role: 'USER' | 'AGENT' | 'SYSTEM'
@@ -56,3 +63,6 @@ export interface User {
   email: string
   name?: string
 }
+
+// Layout types
+export type ViewType = 'projects' | 'sprint' | 'team' | 'settings'

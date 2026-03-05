@@ -1,15 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 // DevForge V2 — Ollama Routes
-import { Router } from 'express';
-import { ollama } from '../lib/ollama.js';
-const router = Router();
+const express_1 = require("express");
+const ollama_js_1 = require("../lib/ollama.js");
+const router = (0, express_1.Router)();
 // GET /api/ollama/status - Check installation and running status
 router.get('/status', async (req, res) => {
     try {
-        const running = await ollama.checkHealth();
+        const running = await ollama_js_1.ollama.checkHealth();
         let models = [];
         if (running) {
             try {
-                models = await ollama.listModels();
+                models = await ollama_js_1.ollama.listModels();
             }
             catch (error) {
                 console.error('[Ollama] Failed to list models:', error);
@@ -34,7 +36,7 @@ router.get('/status', async (req, res) => {
 // GET /api/ollama/models - List available models
 router.get('/models', async (req, res) => {
     try {
-        const models = await ollama.listModels();
+        const models = await ollama_js_1.ollama.listModels();
         res.json({ models });
     }
     catch (error) {
@@ -49,7 +51,7 @@ router.post('/test', async (req, res) => {
     try {
         const { model = 'qwen2.5:14b' } = req.body;
         const startTime = Date.now();
-        const response = await ollama.generate(model, 'Say "OK" if you can read this.', 'You are a test assistant. Respond with exactly "OK" and nothing else.', { temperature: 0, num_predict: 5 });
+        const response = await ollama_js_1.ollama.generate(model, 'Say "OK" if you can read this.', 'You are a test assistant. Respond with exactly "OK" and nothing else.', { temperature: 0, num_predict: 5 });
         const duration = Date.now() - startTime;
         res.json({
             success: true,
@@ -66,4 +68,4 @@ router.post('/test', async (req, res) => {
         });
     }
 });
-export default router;
+exports.default = router;

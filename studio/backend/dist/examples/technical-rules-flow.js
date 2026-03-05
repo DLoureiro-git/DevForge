@@ -1,12 +1,15 @@
+"use strict";
 /**
  * EXEMPLO COMPLETO — Fluxo de Regras Técnicas no DevForge
  *
  * Demonstra como as regras técnicas são geradas pelo Architect
  * e enforçadas pelo Code Validator durante o desenvolvimento.
  */
-import { PMAgent } from '../services/pm-agent';
-import { ArchitectAgent } from '../services/architect';
-import { CodeValidator } from '../services/code-validator';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.exampleFlow = exampleFlow;
+const pm_agent_1 = require("../services/pm-agent");
+const architect_1 = require("../services/architect");
+const code_validator_1 = require("../services/code-validator");
 /**
  * CENÁRIO: User quer criar um CRM multi-tenant com autenticação
  */
@@ -16,7 +19,7 @@ async function exampleFlow() {
     // FASE 1: PM AGENT — Intake & PRD Generation
     // ============================================================================
     console.log('📋 FASE 1: PM Agent a gerar PRD...\n');
-    const pmAgent = new PMAgent();
+    const pmAgent = new pm_agent_1.PMAgent();
     // Simulação de respostas do utilizador (normalmente via chat)
     const mockPRD = {
         projectName: 'SalesPro CRM',
@@ -64,7 +67,7 @@ async function exampleFlow() {
     // FASE 2: ARCHITECT AGENT — Architecture + Technical Rules
     // ============================================================================
     console.log('🏗️ FASE 2: Architect Agent a gerar arquitectura + regras técnicas...\n');
-    const architectAgent = new ArchitectAgent();
+    const architectAgent = new architect_1.ArchitectAgent();
     const architecture = await architectAgent.generateArchitecture(mockPRD);
     console.log('✅ Stack Técnica:', architecture.stack, '\n');
     console.log('✅ Database Schema:', architecture.databaseSchema.tables.length, 'tabelas\n');
@@ -154,7 +157,7 @@ export async function verifyPassword(password: string, hash: string) {
     // FASE 4: CODE VALIDATOR — Enforce Technical Rules
     // ============================================================================
     console.log('🔍 FASE 4: Code Validator a validar contra regras técnicas...\n');
-    const validator = new CodeValidator(architecture);
+    const validator = new code_validator_1.CodeValidator(architecture);
     const validationResult = await validator.validateBatch(generatedFiles);
     console.log('📊 RESULTADO DA VALIDAÇÃO:\n');
     console.log('   Passou:', validationResult.passed ? '❌ NÃO' : '❌ NÃO');
@@ -233,4 +236,3 @@ if (require.main === module) {
         process.exit(1);
     });
 }
-export { exampleFlow };

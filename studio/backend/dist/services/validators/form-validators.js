@@ -1,10 +1,15 @@
+"use strict";
 /**
  * Form Validators - Categoria E: Formulários
  */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.validateFormValidation = validateFormValidation;
+exports.validateServerErrorDisplay = validateServerErrorDisplay;
+exports.validateFormLoadingStates = validateFormLoadingStates;
 // ============================================================================
 // E1: FORM VALIDATION
 // ============================================================================
-export async function validateFormValidation(browser, projectPath, deployUrl) {
+async function validateFormValidation(browser, projectPath, deployUrl) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'forms-001';
@@ -190,7 +195,7 @@ export async function validateFormValidation(browser, projectPath, deployUrl) {
 // ============================================================================
 // E2: SERVER ERROR DISPLAY
 // ============================================================================
-export async function validateServerErrorDisplay(browser, projectPath, deployUrl) {
+async function validateServerErrorDisplay(browser, projectPath, deployUrl) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'forms-002';
@@ -316,7 +321,7 @@ export async function validateServerErrorDisplay(browser, projectPath, deployUrl
 // ============================================================================
 // E3: FORM LOADING STATES
 // ============================================================================
-export async function validateFormLoadingStates(browser, projectPath, deployUrl) {
+async function validateFormLoadingStates(browser, projectPath, deployUrl) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'forms-003';

@@ -1,12 +1,15 @@
+"use strict";
 /**
  * CODE VALIDATOR — Validação de Código Contra Regras Técnicas
  *
  * Valida código gerado contra TECHNICAL RULES da arquitectura
  * para prevenir "context drift" entre Claude e Ollama.
  */
-import { Ollama } from 'ollama';
-const ollama = new Ollama({ host: 'http://localhost:11434' });
-export class CodeValidator {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CodeValidator = void 0;
+const ollama_1 = require("ollama");
+const ollama = new ollama_1.Ollama({ host: 'http://localhost:11434' });
+class CodeValidator {
     technicalRules;
     constructor(architecture) {
         this.technicalRules = architecture.technicalRules;
@@ -211,6 +214,7 @@ ${result.passed ? 'Corrigir warnings antes de deploy' : 'CORRIGIR ERROS antes de
         }).join('\n');
     }
 }
+exports.CodeValidator = CodeValidator;
 /**
  * EXEMPLO DE USO NO PIPELINE:
  *

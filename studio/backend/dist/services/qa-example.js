@@ -1,10 +1,18 @@
+"use strict";
 /**
  * DevForge V2 - QA System Usage Examples
  * Demonstra como usar o sistema de QA inteligente
  */
-import { executeQA, executeQuickQA, generateQAReport } from './qa-executor';
-import { writeFileSync } from 'fs';
-import { join } from 'path';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.runFullQA = runFullQA;
+exports.runQuickCheck = runQuickCheck;
+exports.runReportOnly = runReportOnly;
+exports.runDebugQA = runDebugQA;
+exports.runCICD = runCICD;
+exports.runProgressiveQA = runProgressiveQA;
+const qa_executor_1 = require("./qa-executor");
+const fs_1 = require("fs");
+const path_1 = require("path");
 // ============================================================================
 // EXAMPLE 1: QA COMPLETO COM AUTO-FIX
 // ============================================================================
@@ -36,7 +44,7 @@ async function runFullQA() {
 - Segurança: rotas protegidas, sessions httpOnly
 - Acessibilidade: WCAG AA
   `;
-    const result = await executeQA({
+    const result = await (0, qa_executor_1.executeQA)({
         prd,
         projectPath: '/caminho/para/projeto',
         deployUrl: 'https://meu-app.vercel.app',
@@ -46,10 +54,10 @@ async function runFullQA() {
         ollamaEndpoint: 'http://localhost:11434',
     });
     // Gerar relatório
-    const report = generateQAReport(result);
+    const report = (0, qa_executor_1.generateQAReport)(result);
     // Guardar relatório
-    const reportPath = join(process.cwd(), 'qa-report.md');
-    writeFileSync(reportPath, report);
+    const reportPath = (0, path_1.join)(process.cwd(), 'qa-report.md');
+    (0, fs_1.writeFileSync)(reportPath, report);
     console.log(`📄 Relatório guardado em: ${reportPath}`);
     // Retornar resultado
     return result;
@@ -73,7 +81,7 @@ async function runQuickCheck() {
 - Resend (emails)
 - Deploy: Vercel
   `;
-    const result = await executeQuickQA({
+    const result = await (0, qa_executor_1.executeQuickQA)({
         prd,
         projectPath: '/caminho/para/landing-page',
         deployUrl: 'https://landing.vercel.app',
@@ -106,14 +114,14 @@ async function runReportOnly() {
 - NextAuth.js
 - Deploy: Railway
   `;
-    const result = await executeQA({
+    const result = await (0, qa_executor_1.executeQA)({
         prd,
         projectPath: '/caminho/para/ecommerce',
         deployUrl: 'https://ecommerce.railway.app',
         headless: true,
         autoFix: false, // apenas reportar, sem corrigir
     });
-    const report = generateQAReport(result);
+    const report = (0, qa_executor_1.generateQAReport)(result);
     console.log('\n' + report);
     return result;
 }
@@ -121,7 +129,7 @@ async function runReportOnly() {
 // EXAMPLE 4: QA COM BROWSER VISÍVEL (DEBUG)
 // ============================================================================
 async function runDebugQA() {
-    const result = await executeQA({
+    const result = await (0, qa_executor_1.executeQA)({
         prd: 'Sistema de gestão',
         projectPath: '/caminho/para/projeto',
         deployUrl: 'http://localhost:3000',
@@ -137,7 +145,7 @@ async function runCICD() {
     const prd = process.env.PRD || '';
     const projectPath = process.env.PROJECT_PATH || process.cwd();
     const deployUrl = process.env.DEPLOY_URL;
-    const result = await executeQA({
+    const result = await (0, qa_executor_1.executeQA)({
         prd,
         projectPath,
         deployUrl,
@@ -183,10 +191,6 @@ async function runProgressiveQA() {
     // executeQA com apenas checks de UI...
     console.log('\n✅ QA Progressivo completo');
 }
-// ============================================================================
-// EXPORT
-// ============================================================================
-export { runFullQA, runQuickCheck, runReportOnly, runDebugQA, runCICD, runProgressiveQA, };
 // ============================================================================
 // CLI EXECUTION
 // ============================================================================

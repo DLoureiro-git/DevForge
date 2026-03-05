@@ -330,9 +330,10 @@ async function main() {
 }
 
 // Executar se for chamado directamente
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch(console.error)
-}
+// Comentado para compatibilidade CommonJS
+// if (import.meta.url === `file://${process.argv[1]}`) {
+//   main().catch(console.error)
+// }
 
 export {
   exemploCompleto,

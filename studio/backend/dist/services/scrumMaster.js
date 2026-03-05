@@ -1,10 +1,16 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ScrumMaster = void 0;
 // DevForge V2 — Scrum Master Service
-import Anthropic from '@anthropic-ai/sdk';
-import { prisma } from '../lib/prisma.js';
-export class ScrumMaster {
+const sdk_1 = __importDefault(require("@anthropic-ai/sdk"));
+const prisma_js_1 = require("../lib/prisma.js");
+class ScrumMaster {
     client;
     constructor(apiKey) {
-        this.client = new Anthropic({
+        this.client = new sdk_1.default({
             apiKey: apiKey || process.env.ANTHROPIC_API_KEY || '',
         });
     }
@@ -12,7 +18,7 @@ export class ScrumMaster {
      * Gera daily standup baseado no estado actual do sprint
      */
     async generateDailyStandup(sprintId) {
-        const sprint = await prisma.sprint.findUnique({
+        const sprint = await prisma_js_1.prisma.sprint.findUnique({
             where: { id: sprintId },
             include: {
                 features: {
@@ -108,7 +114,7 @@ Be concise and actionable. Return JSON format:
      * Planeia próximo sprint baseado no backlog
      */
     async planSprint(projectId, number) {
-        const project = await prisma.project.findUnique({
+        const project = await prisma_js_1.prisma.project.findUnique({
             where: { id: projectId },
             include: {
                 features: {
@@ -123,7 +129,7 @@ Be concise and actionable. Return JSON format:
             throw new Error('Project not found');
         }
         // Get historical velocity
-        const completedSprints = await prisma.sprint.findMany({
+        const completedSprints = await prisma_js_1.prisma.sprint.findMany({
             where: {
                 projectId,
                 status: 'DONE',
@@ -195,7 +201,7 @@ Return JSON format:
      * Gera relatório de sprint review
      */
     async sprintReview(sprintId) {
-        const sprint = await prisma.sprint.findUnique({
+        const sprint = await prisma_js_1.prisma.sprint.findUnique({
             where: { id: sprintId },
             include: {
                 features: {
@@ -288,7 +294,7 @@ Be constructive and specific. Return JSON format:
         if (!limit || limit === 999) {
             return true; // sem limite
         }
-        const count = await prisma.feature.count({
+        const count = await prisma_js_1.prisma.feature.count({
             where: {
                 projectId,
                 status: targetStatus,
@@ -337,3 +343,4 @@ ${feature.acceptanceCriteria ? `Acceptance Criteria:\n${feature.acceptanceCriter
         return 3; // default
     }
 }
+exports.ScrumMaster = ScrumMaster;

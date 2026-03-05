@@ -1,3 +1,4 @@
+"use strict";
 /**
  * DELIVERY AGENT — Claude Opus 4.6
  *
@@ -6,8 +7,13 @@
  * - Métricas de sucesso
  * - Aprovação para produção
  */
-import Anthropic from '@anthropic-ai/sdk';
-import { createAnthropicClient } from '../lib/anthropic';
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DeliveryAgent = void 0;
+const sdk_1 = __importDefault(require("@anthropic-ai/sdk"));
+const anthropic_1 = require("../lib/anthropic");
 // ============================================================================
 // DELIVERY AGENT
 // ============================================================================
@@ -74,12 +80,12 @@ A tua missão é preparar documentação completa e checklist de entrega para pr
 
 Gera JSON estruturado com todas as secções.
 Depois converte para DELIVERY.md em Markdown.`;
-export class DeliveryAgent {
+class DeliveryAgent {
     client;
     constructor(apiKey) {
         this.client = apiKey
-            ? createAnthropicClient(apiKey)
-            : new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+            ? (0, anthropic_1.createAnthropicClient)(apiKey)
+            : new sdk_1.default({ apiKey: process.env.ANTHROPIC_API_KEY });
     }
     /**
      * Gerar documentação de delivery completa
@@ -449,3 +455,4 @@ ${this.formatKnownBugs(qaResults.allBugs)}
         return output;
     }
 }
+exports.DeliveryAgent = DeliveryAgent;

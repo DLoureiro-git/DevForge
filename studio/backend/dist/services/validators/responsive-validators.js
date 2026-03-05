@@ -1,6 +1,12 @@
+"use strict";
 /**
  * Responsive Validators - Categoria B: Responsive & Mobile
  */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.checkHorizontalOverflow = checkHorizontalOverflow;
+exports.checkTouchTargets = checkTouchTargets;
+exports.validateBreakpoints = validateBreakpoints;
+exports.validateTextReadability = validateTextReadability;
 const BREAKPOINTS = [
     { width: 375, height: 667, name: 'iPhone SE' },
     { width: 390, height: 844, name: 'iPhone 12/13' },
@@ -13,7 +19,7 @@ const MIN_MOBILE_FONT_SIZE = 14; // pixels
 // ============================================================================
 // B1: HORIZONTAL OVERFLOW
 // ============================================================================
-export async function checkHorizontalOverflow(browser, projectPath, deployUrl) {
+async function checkHorizontalOverflow(browser, projectPath, deployUrl) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'responsive-001';
@@ -116,7 +122,7 @@ export async function checkHorizontalOverflow(browser, projectPath, deployUrl) {
 // ============================================================================
 // B2: TOUCH TARGETS
 // ============================================================================
-export async function checkTouchTargets(browser, projectPath, deployUrl) {
+async function checkTouchTargets(browser, projectPath, deployUrl) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'responsive-002';
@@ -202,7 +208,7 @@ export async function checkTouchTargets(browser, projectPath, deployUrl) {
 // ============================================================================
 // B3: BREAKPOINTS
 // ============================================================================
-export async function validateBreakpoints(browser, projectPath, deployUrl) {
+async function validateBreakpoints(browser, projectPath, deployUrl) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'responsive-003';
@@ -297,7 +303,7 @@ export async function validateBreakpoints(browser, projectPath, deployUrl) {
 // ============================================================================
 // B4: TEXT READABILITY
 // ============================================================================
-export async function validateTextReadability(browser, projectPath, deployUrl) {
+async function validateTextReadability(browser, projectPath, deployUrl) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'responsive-004';

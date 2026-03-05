@@ -1,11 +1,14 @@
+"use strict";
 /**
  * EXEMPLO DE USO DO DEV TEAM
  *
  * Demonstra como usar o DevTeam para gerar código automaticamente
  * a partir de uma architecture gerada pelo Architect Agent
  */
-import { DevTeam } from '../services/dev-team';
-import { ArchitectAgent } from '../services/architect';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.exampleDevTeamFlow = exampleDevTeamFlow;
+const dev_team_1 = require("../services/dev-team");
+const architect_1 = require("../services/architect");
 async function exampleDevTeamFlow() {
     console.log('🚀 DevForge V2 — Dev Team Example\n');
     // 1. Mock de um PRD simples
@@ -43,7 +46,7 @@ async function exampleDevTeamFlow() {
     };
     // 2. Gerar Architecture com Architect Agent
     console.log('📐 Gerando architecture com Architect Agent...\n');
-    const architect = new ArchitectAgent();
+    const architect = new architect_1.ArchitectAgent();
     const architecture = await architect.generateArchitecture(mockPRD);
     console.log('✅ Architecture gerada!');
     console.log(`  - Stack: ${architecture.stack.frontend}`);
@@ -52,7 +55,7 @@ async function exampleDevTeamFlow() {
     console.log(`  - Regras técnicas: ${architecture.technicalRules.length}\n`);
     // 3. Executar Dev Team
     console.log('👥 Executando Dev Team...\n');
-    const devTeam = new DevTeam();
+    const devTeam = new dev_team_1.DevTeam();
     const result = await devTeam.execute({
         architecture: architecture.architectureMarkdown,
         technicalRules: architecture.technicalRules
@@ -88,4 +91,3 @@ async function exampleDevTeamFlow() {
 if (require.main === module) {
     exampleDevTeamFlow().catch(console.error);
 }
-export { exampleDevTeamFlow };

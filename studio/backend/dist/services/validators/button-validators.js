@@ -1,10 +1,15 @@
+"use strict";
 /**
  * Button Validators - Categoria F: Botões & Interatividade
  */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.validateAllButtons = validateAllButtons;
+exports.validateLoadingStates = validateLoadingStates;
+exports.validateDisabledStates = validateDisabledStates;
 // ============================================================================
 // F1: ALL BUTTONS WORK
 // ============================================================================
-export async function validateAllButtons(browser, projectPath, deployUrl) {
+async function validateAllButtons(browser, projectPath, deployUrl) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'buttons-001';
@@ -161,7 +166,7 @@ export async function validateAllButtons(browser, projectPath, deployUrl) {
 // ============================================================================
 // F2: LOADING STATES
 // ============================================================================
-export async function validateLoadingStates(browser, projectPath, deployUrl) {
+async function validateLoadingStates(browser, projectPath, deployUrl) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'buttons-002';
@@ -272,7 +277,7 @@ export async function validateLoadingStates(browser, projectPath, deployUrl) {
 // ============================================================================
 // F3: DISABLED STATES
 // ============================================================================
-export async function validateDisabledStates(browser, projectPath, deployUrl) {
+async function validateDisabledStates(browser, projectPath, deployUrl) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'buttons-003';

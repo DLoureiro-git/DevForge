@@ -1,15 +1,54 @@
+"use strict";
 /**
  * EXEMPLO DE USO DO PIPELINE COMPLETO
  *
  * Este ficheiro demonstra como usar o DevForge V2 Pipeline
  * para gerar uma aplicação completa do zero.
  */
-import { Pipeline } from './orchestrator';
-import { PMAgent } from './pm-agent';
-import { DeployService } from './deploy-service';
-import { ProjectGenerator } from './project-generator';
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.exemploCompleto = exemploCompleto;
+exports.exemploDeployAutomatico = exemploDeployAutomatico;
+exports.exemploGerarZip = exemploGerarZip;
+exports.exemploMonitoringSSE = exemploMonitoringSSE;
+const orchestrator_1 = require("./orchestrator");
+const pm_agent_1 = require("./pm-agent");
+const deploy_service_1 = require("./deploy-service");
+const project_generator_1 = require("./project-generator");
+const client_1 = require("@prisma/client");
+const prisma = new client_1.PrismaClient();
 // ============================================================================
 // EXEMPLO 1: Pipeline Completo (PM → Delivery)
 // ============================================================================
@@ -33,7 +72,7 @@ async function exemploCompleto() {
     });
     console.log(`✅ Project criado: ${project.id}`);
     // 2. EXECUTAR PM AGENT (Intake conversacional)
-    const pmAgent = new PMAgent();
+    const pmAgent = new pm_agent_1.PMAgent();
     // Simular conversa (na realidade isto seria interactivo)
     const mensagens = [
         'Quero uma app para gerir as minhas tarefas diárias',
@@ -69,7 +108,7 @@ async function exemploCompleto() {
     });
     console.log('✅ PRD gerado pelo PM Agent');
     // 3. EXECUTAR PIPELINE COMPLETO
-    const pipeline = new Pipeline({
+    const pipeline = new orchestrator_1.Pipeline({
         projectId: project.id,
         outputDirectory: './generated-projects',
         ollamaEndpoint: 'http://localhost:11434',
@@ -128,7 +167,7 @@ async function exemploDeployAutomatico() {
         return;
     }
     // 1. GERAR FICHEIROS DE PROJECTO (package.json, README, etc.)
-    const generator = new ProjectGenerator();
+    const generator = new project_generator_1.ProjectGenerator();
     generator.generatePackageJson(project.prd, project.outputPath);
     generator.generateEnvExample(project.architecture, project.outputPath);
     generator.generateReadme({
@@ -141,7 +180,7 @@ async function exemploDeployAutomatico() {
     generator.generateGitignore(project.outputPath);
     console.log('✅ Ficheiros de projecto gerados');
     // 2. DEPLOY COMPLETO (GitHub + Vercel + Railway)
-    const deployService = new DeployService();
+    const deployService = new deploy_service_1.DeployService();
     const deployResult = await deployService.deployComplete({
         projectPath: project.outputPath,
         projectName: project.name,
@@ -198,12 +237,12 @@ async function exemploGerarZip() {
         console.error('❌ Project não encontrado ou sem código gerado');
         return;
     }
-    const generator = new ProjectGenerator();
+    const generator = new project_generator_1.ProjectGenerator();
     console.log('📦 Criando ZIP...');
     const zipBuffer = await generator.zipProject(project.outputPath);
     console.log(`✅ ZIP criado (${(zipBuffer.length / 1024 / 1024).toFixed(2)} MB)`);
     // Gravar ZIP no disco (opcional)
-    const fs = await import('fs');
+    const fs = await Promise.resolve().then(() => __importStar(require('fs')));
     fs.writeFileSync(`./downloads/${project.name}.zip`, zipBuffer);
     console.log(`💾 ZIP gravado em ./downloads/${project.name}.zip`);
     console.log('='.repeat(60));
@@ -216,7 +255,7 @@ async function exemploMonitoringSSE() {
     console.log('EXEMPLO 4: Monitoring em Tempo Real (SSE)');
     console.log('='.repeat(60));
     const projectId = 'abc123';
-    const pipeline = new Pipeline({
+    const pipeline = new orchestrator_1.Pipeline({
         projectId,
         claudeApiKey: process.env.ANTHROPIC_API_KEY
     });
@@ -266,8 +305,3 @@ async function main() {
     }
     await prisma.$disconnect();
 }
-// Executar se for chamado directamente
-if (import.meta.url === `file://${process.argv[1]}`) {
-    main().catch(console.error);
-}
-export { exemploCompleto, exemploDeployAutomatico, exemploGerarZip, exemploMonitoringSSE };

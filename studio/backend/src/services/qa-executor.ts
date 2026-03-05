@@ -28,6 +28,8 @@ export interface QAExecutionConfig {
   headless?: boolean;
   autoFix?: boolean;
   claudeApiKey?: string;
+  featureId?: string;
+  acceptanceCriteria?: string[];
   ollamaEndpoint?: string;
 }
 

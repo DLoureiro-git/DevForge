@@ -1,13 +1,19 @@
+"use strict";
 /**
  * Deploy Validators - Categoria A: Deploy & Infraestrutura
  */
-import { execSync } from 'child_process';
-import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.validateDeploy = validateDeploy;
+exports.validateEnvVars = validateEnvVars;
+exports.validateBuildSuccess = validateBuildSuccess;
+exports.validateFullStack = validateFullStack;
+const child_process_1 = require("child_process");
+const fs_1 = require("fs");
+const path_1 = require("path");
 // ============================================================================
 // A1: DEPLOY PRODUÇÃO
 // ============================================================================
-export async function validateDeploy(browser, projectPath, deployUrl) {
+async function validateDeploy(browser, projectPath, deployUrl) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'deploy-001';
@@ -132,13 +138,13 @@ export async function validateDeploy(browser, projectPath, deployUrl) {
 // ============================================================================
 // A2: VARIÁVEIS DE AMBIENTE
 // ============================================================================
-export async function validateEnvVars(browser, projectPath) {
+async function validateEnvVars(browser, projectPath) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'deploy-002';
-    const envExamplePath = join(projectPath, '.env.example');
-    const envPath = join(projectPath, '.env');
-    if (!existsSync(envExamplePath)) {
+    const envExamplePath = (0, path_1.join)(projectPath, '.env.example');
+    const envPath = (0, path_1.join)(projectPath, '.env');
+    if (!(0, fs_1.existsSync)(envExamplePath)) {
         bugs.push({
             id: `${checkId}-no-example`,
             checkId,
@@ -150,7 +156,7 @@ export async function validateEnvVars(browser, projectPath) {
             foundAt: new Date(),
         });
     }
-    if (!existsSync(envPath)) {
+    if (!(0, fs_1.existsSync)(envPath)) {
         bugs.push({
             id: `${checkId}-no-env`,
             checkId,
@@ -169,7 +175,7 @@ export async function validateEnvVars(browser, projectPath) {
             timestamp: new Date(),
         };
     }
-    const envContent = readFileSync(envPath, 'utf-8');
+    const envContent = (0, fs_1.readFileSync)(envPath, 'utf-8');
     const envLines = envContent.split('\n').filter(l => l.trim() && !l.startsWith('#'));
     // Verificar se há variáveis vazias
     const emptyVars = envLines.filter(line => {
@@ -221,13 +227,13 @@ export async function validateEnvVars(browser, projectPath) {
 // ============================================================================
 // A3: BUILD PRODUÇÃO
 // ============================================================================
-export async function validateBuildSuccess(browser, projectPath) {
+async function validateBuildSuccess(browser, projectPath) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'deploy-003';
     try {
-        const packageJsonPath = join(projectPath, 'package.json');
-        if (!existsSync(packageJsonPath)) {
+        const packageJsonPath = (0, path_1.join)(projectPath, 'package.json');
+        if (!(0, fs_1.existsSync)(packageJsonPath)) {
             bugs.push({
                 id: `${checkId}-no-package-json`,
                 checkId,
@@ -246,7 +252,7 @@ export async function validateBuildSuccess(browser, projectPath) {
                 timestamp: new Date(),
             };
         }
-        const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+        const packageJson = JSON.parse((0, fs_1.readFileSync)(packageJsonPath, 'utf-8'));
         const buildCommand = packageJson.scripts?.build;
         if (!buildCommand) {
             bugs.push({
@@ -269,7 +275,7 @@ export async function validateBuildSuccess(browser, projectPath) {
         }
         // Tentar executar build (timeout 5min)
         try {
-            execSync('npm run build', {
+            (0, child_process_1.execSync)('npm run build', {
                 cwd: projectPath,
                 timeout: 300000,
                 stdio: 'pipe',
@@ -312,7 +318,7 @@ export async function validateBuildSuccess(browser, projectPath) {
 // ============================================================================
 // A4: FULL-STACK INTEGRATION
 // ============================================================================
-export async function validateFullStack(browser, projectPath, deployUrl) {
+async function validateFullStack(browser, projectPath, deployUrl) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'deploy-004';

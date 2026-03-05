@@ -1,20 +1,22 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 // DevForge V2 — Sprints Routes
-import { Router } from 'express';
-import { prisma } from '../lib/prisma.js';
-import { AppError } from '../middleware/error.js';
-import { requireAuth } from '../middleware/auth.js';
-import { ensureProjectOwner } from '../middleware/multiTenant.js';
-const router = Router();
+const express_1 = require("express");
+const prisma_js_1 = require("../lib/prisma.js");
+const error_js_1 = require("../middleware/error.js");
+const auth_js_1 = require("../middleware/auth.js");
+const multiTenant_js_1 = require("../middleware/multiTenant.js");
+const router = (0, express_1.Router)();
 // Helper to ensure param is string
 function getParamId(param) {
     return Array.isArray(param) ? param[0] : param;
 }
 // GET /api/projects/:id/sprints - List all sprints for project
-router.get('/:id/sprints', requireAuth, async (req, res, next) => {
+router.get('/:id/sprints', auth_js_1.requireAuth, async (req, res, next) => {
     try {
         const projectId = getParamId(req.params.id);
-        await ensureProjectOwner(projectId, req.user.id);
-        const sprints = await prisma.sprint.findMany({
+        await (0, multiTenant_js_1.ensureProjectOwner)(projectId, req.user.id);
+        const sprints = await prisma_js_1.prisma.sprint.findMany({
             where: { projectId },
             include: {
                 features: {
@@ -38,21 +40,21 @@ router.get('/:id/sprints', requireAuth, async (req, res, next) => {
     }
 });
 // POST /api/projects/:id/sprints - Create new sprint
-router.post('/:id/sprints', requireAuth, async (req, res, next) => {
+router.post('/:id/sprints', auth_js_1.requireAuth, async (req, res, next) => {
     try {
         const projectId = getParamId(req.params.id);
-        await ensureProjectOwner(projectId, req.user.id);
+        await (0, multiTenant_js_1.ensureProjectOwner)(projectId, req.user.id);
         const { goal, startDate, endDate, capacity } = req.body;
         if (!goal) {
-            throw new AppError('Sprint goal is required', 400);
+            throw new error_js_1.AppError('Sprint goal is required', 400);
         }
         // Get next sprint number
-        const lastSprint = await prisma.sprint.findFirst({
+        const lastSprint = await prisma_js_1.prisma.sprint.findFirst({
             where: { projectId },
             orderBy: { number: 'desc' },
         });
         const number = lastSprint ? lastSprint.number + 1 : 1;
-        const sprint = await prisma.sprint.create({
+        const sprint = await prisma_js_1.prisma.sprint.create({
             data: {
                 projectId,
                 number,
@@ -76,23 +78,23 @@ router.post('/:id/sprints', requireAuth, async (req, res, next) => {
     }
 });
 // PUT /api/projects/:id/sprints/:sid - Update sprint
-router.put('/:id/sprints/:sid', requireAuth, async (req, res, next) => {
+router.put('/:id/sprints/:sid', auth_js_1.requireAuth, async (req, res, next) => {
     try {
         const projectId = getParamId(req.params.id);
         const sprintId = getParamId(req.params.sid);
-        await ensureProjectOwner(projectId, req.user.id);
+        await (0, multiTenant_js_1.ensureProjectOwner)(projectId, req.user.id);
         const { goal, startDate, endDate, plannedPoints } = req.body;
         // Verify sprint belongs to project
-        const existingSprint = await prisma.sprint.findFirst({
+        const existingSprint = await prisma_js_1.prisma.sprint.findFirst({
             where: {
                 id: sprintId,
                 projectId,
             },
         });
         if (!existingSprint) {
-            throw new AppError('Sprint not found', 404);
+            throw new error_js_1.AppError('Sprint not found', 404);
         }
-        const updated = await prisma.sprint.update({
+        const updated = await prisma_js_1.prisma.sprint.update({
             where: { id: sprintId },
             data: {
                 goal,
@@ -114,34 +116,34 @@ router.put('/:id/sprints/:sid', requireAuth, async (req, res, next) => {
     }
 });
 // POST /api/projects/:id/sprints/:sid/start - Start sprint
-router.post('/:id/sprints/:sid/start', requireAuth, async (req, res, next) => {
+router.post('/:id/sprints/:sid/start', auth_js_1.requireAuth, async (req, res, next) => {
     try {
         const projectId = getParamId(req.params.id);
         const sprintId = getParamId(req.params.sid);
-        await ensureProjectOwner(projectId, req.user.id);
-        const sprint = await prisma.sprint.findFirst({
+        await (0, multiTenant_js_1.ensureProjectOwner)(projectId, req.user.id);
+        const sprint = await prisma_js_1.prisma.sprint.findFirst({
             where: {
                 id: sprintId,
                 projectId,
             },
         });
         if (!sprint) {
-            throw new AppError('Sprint not found', 404);
+            throw new error_js_1.AppError('Sprint not found', 404);
         }
         if (sprint.status !== 'PLANNING') {
-            throw new AppError('Sprint can only be started from PLANNING status', 400);
+            throw new error_js_1.AppError('Sprint can only be started from PLANNING status', 400);
         }
         // Check if there's already an active sprint
-        const activeSprint = await prisma.sprint.findFirst({
+        const activeSprint = await prisma_js_1.prisma.sprint.findFirst({
             where: {
                 projectId,
                 status: 'ACTIVE',
             },
         });
         if (activeSprint) {
-            throw new AppError('There is already an active sprint. Complete it first.', 400);
+            throw new error_js_1.AppError('There is already an active sprint. Complete it first.', 400);
         }
-        const updated = await prisma.sprint.update({
+        const updated = await prisma_js_1.prisma.sprint.update({
             where: { id: sprintId },
             data: {
                 status: 'ACTIVE',
@@ -161,12 +163,12 @@ router.post('/:id/sprints/:sid/start', requireAuth, async (req, res, next) => {
     }
 });
 // POST /api/projects/:id/sprints/:sid/end - End sprint
-router.post('/:id/sprints/:sid/end', requireAuth, async (req, res, next) => {
+router.post('/:id/sprints/:sid/end', auth_js_1.requireAuth, async (req, res, next) => {
     try {
         const projectId = getParamId(req.params.id);
         const sprintId = getParamId(req.params.sid);
-        await ensureProjectOwner(projectId, req.user.id);
-        const sprint = await prisma.sprint.findFirst({
+        await (0, multiTenant_js_1.ensureProjectOwner)(projectId, req.user.id);
+        const sprint = await prisma_js_1.prisma.sprint.findFirst({
             where: {
                 id: sprintId,
                 projectId,
@@ -176,16 +178,16 @@ router.post('/:id/sprints/:sid/end', requireAuth, async (req, res, next) => {
             },
         });
         if (!sprint) {
-            throw new AppError('Sprint not found', 404);
+            throw new error_js_1.AppError('Sprint not found', 404);
         }
         if (sprint.status !== 'ACTIVE') {
-            throw new AppError('Only active sprints can be completed', 400);
+            throw new error_js_1.AppError('Only active sprints can be completed', 400);
         }
         // Calculate completion stats
         const completedFeatures = sprint.features.filter((f) => f.status === 'DONE');
         const totalStoryPoints = sprint.features.reduce((sum, f) => sum + (f.storyPoints || 0), 0);
         const completedStoryPoints = completedFeatures.reduce((sum, f) => sum + (f.storyPoints || 0), 0);
-        const updated = await prisma.sprint.update({
+        const updated = await prisma_js_1.prisma.sprint.update({
             where: { id: sprintId },
             data: {
                 status: 'DONE',
@@ -214,4 +216,4 @@ router.post('/:id/sprints/:sid/end', requireAuth, async (req, res, next) => {
         next(error);
     }
 });
-export default router;
+exports.default = router;

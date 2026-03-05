@@ -8,7 +8,7 @@
 
 **Severidade:** HIGH
 **Categoria:** PIPELINE
-**Status:** ENCONTRADO
+**Status:** ✅ CORRIGIDO
 
 ### Descrição
 Pipeline tenta actualizar projetos que já foram apagados no cleanup dos testes.
@@ -120,8 +120,8 @@ jest.mock('../src/lib/anthropic', () => ({
 - LOW: 1
 
 **Por status:**
-- OPEN: 3
-- FIXED: 0
+- OPEN: 2
+- FIXED: 1
 - WONTFIX: 0
 
 ---

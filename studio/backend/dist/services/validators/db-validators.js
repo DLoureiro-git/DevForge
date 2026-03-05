@@ -1,13 +1,18 @@
+"use strict";
 /**
  * Database Validators - Categoria C: Database & Persistência
  */
-import { execSync } from 'child_process';
-import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.validateDataPersistence = validateDataPersistence;
+exports.validateConcurrentWrites = validateConcurrentWrites;
+exports.validateMigrations = validateMigrations;
+const child_process_1 = require("child_process");
+const fs_1 = require("fs");
+const path_1 = require("path");
 // ============================================================================
 // C1: DATA PERSISTENCE
 // ============================================================================
-export async function validateDataPersistence(browser, projectPath, deployUrl) {
+async function validateDataPersistence(browser, projectPath, deployUrl) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'db-001';
@@ -185,7 +190,7 @@ export async function validateDataPersistence(browser, projectPath, deployUrl) {
 // ============================================================================
 // C2: CONCURRENT WRITES
 // ============================================================================
-export async function validateConcurrentWrites(browser, projectPath, deployUrl) {
+async function validateConcurrentWrites(browser, projectPath, deployUrl) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'db-002';
@@ -309,15 +314,15 @@ export async function validateConcurrentWrites(browser, projectPath, deployUrl) 
 // ============================================================================
 // C3: MIGRATIONS
 // ============================================================================
-export async function validateMigrations(browser, projectPath) {
+async function validateMigrations(browser, projectPath) {
     const startTime = Date.now();
     const bugs = [];
     const checkId = 'db-003';
     try {
         // Verificar se Prisma existe
-        const schemaPath = join(projectPath, 'prisma', 'schema.prisma');
-        const migrationsPath = join(projectPath, 'prisma', 'migrations');
-        if (!existsSync(schemaPath)) {
+        const schemaPath = (0, path_1.join)(projectPath, 'prisma', 'schema.prisma');
+        const migrationsPath = (0, path_1.join)(projectPath, 'prisma', 'migrations');
+        if (!(0, fs_1.existsSync)(schemaPath)) {
             bugs.push({
                 id: `${checkId}-no-schema`,
                 checkId,
@@ -337,7 +342,7 @@ export async function validateMigrations(browser, projectPath) {
             };
         }
         // Verificar se há migrations
-        if (!existsSync(migrationsPath)) {
+        if (!(0, fs_1.existsSync)(migrationsPath)) {
             bugs.push({
                 id: `${checkId}-no-migrations`,
                 checkId,
@@ -351,7 +356,7 @@ export async function validateMigrations(browser, projectPath) {
         }
         // Tentar executar prisma migrate status
         try {
-            execSync('npx prisma migrate status', {
+            (0, child_process_1.execSync)('npx prisma migrate status', {
                 cwd: projectPath,
                 timeout: 30000,
                 stdio: 'pipe',
@@ -385,7 +390,7 @@ export async function validateMigrations(browser, projectPath) {
             }
         }
         // Verificar schema.prisma para problemas comuns
-        const schemaContent = readFileSync(schemaPath, 'utf-8');
+        const schemaContent = (0, fs_1.readFileSync)(schemaPath, 'utf-8');
         if (!schemaContent.includes('provider')) {
             bugs.push({
                 id: `${checkId}-no-provider`,

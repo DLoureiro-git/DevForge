@@ -1,26 +1,28 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 // DevForge V2 — Auth Routes
-import { Router } from 'express';
-import { prisma } from '../lib/prisma.js';
-import { AppError } from '../middleware/error.js';
-import { requireAuth } from '../middleware/auth.js';
-const router = Router();
+const express_1 = require("express");
+const prisma_js_1 = require("../lib/prisma.js");
+const error_js_1 = require("../middleware/error.js");
+const auth_js_1 = require("../middleware/auth.js");
+const router = (0, express_1.Router)();
 // POST /api/auth/register
 router.post('/register', async (req, res, next) => {
     try {
         const { email, name, password } = req.body;
         if (!email || !password) {
-            throw new AppError('Email and password are required', 400);
+            throw new error_js_1.AppError('Email and password are required', 400);
         }
         // Check if user exists
-        const existing = await prisma.user.findUnique({
+        const existing = await prisma_js_1.prisma.user.findUnique({
             where: { email },
         });
         if (existing) {
-            throw new AppError('User already exists', 409);
+            throw new error_js_1.AppError('User already exists', 409);
         }
         // TODO: Hash password with Better-Auth
         // For now, create user without password (will be handled by Better-Auth)
-        const user = await prisma.user.create({
+        const user = await prisma_js_1.prisma.user.create({
             data: {
                 email,
                 name: name || null,
@@ -49,9 +51,9 @@ router.post('/login', async (req, res, next) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) {
-            throw new AppError('Email and password are required', 400);
+            throw new error_js_1.AppError('Email and password are required', 400);
         }
-        const user = await prisma.user.findUnique({
+        const user = await prisma_js_1.prisma.user.findUnique({
             where: { email },
             select: {
                 id: true,
@@ -61,7 +63,7 @@ router.post('/login', async (req, res, next) => {
             },
         });
         if (!user) {
-            throw new AppError('Invalid credentials', 401);
+            throw new error_js_1.AppError('Invalid credentials', 401);
         }
         // TODO: Verify password with Better-Auth
         // TODO: Create session with Better-Auth
@@ -75,7 +77,7 @@ router.post('/login', async (req, res, next) => {
     }
 });
 // POST /api/auth/logout
-router.post('/logout', requireAuth, async (req, res, next) => {
+router.post('/logout', auth_js_1.requireAuth, async (req, res, next) => {
     try {
         // TODO: Destroy session with Better-Auth
         res.json({ message: 'Logged out successfully' });
@@ -85,9 +87,9 @@ router.post('/logout', requireAuth, async (req, res, next) => {
     }
 });
 // GET /api/auth/me
-router.get('/me', requireAuth, async (req, res, next) => {
+router.get('/me', auth_js_1.requireAuth, async (req, res, next) => {
     try {
-        const user = await prisma.user.findUnique({
+        const user = await prisma_js_1.prisma.user.findUnique({
             where: { id: req.user.id },
             select: {
                 id: true,
@@ -103,7 +105,7 @@ router.get('/me', requireAuth, async (req, res, next) => {
             },
         });
         if (!user) {
-            throw new AppError('User not found', 404);
+            throw new error_js_1.AppError('User not found', 404);
         }
         res.json(user);
     }
@@ -111,4 +113,4 @@ router.get('/me', requireAuth, async (req, res, next) => {
         next(error);
     }
 });
-export default router;
+exports.default = router;

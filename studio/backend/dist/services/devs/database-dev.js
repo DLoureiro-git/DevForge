@@ -1,9 +1,12 @@
+"use strict";
 /**
  * DATABASE DEVELOPER AGENT
  * Especializado em: Prisma Schema, Migrations, Relations, Indexes
  */
-import { ollama } from '../../lib/ollama';
-import { getModelForDev, getOllamaOptions, devLog } from './dev-config';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DatabaseDev = void 0;
+const ollama_1 = require("../../lib/ollama");
+const dev_config_1 = require("./dev-config");
 const DATABASE_DEV_SYSTEM_PROMPT = `Você é um Database Engineer especializado em Prisma.
 
 Sua responsabilidade:
@@ -51,10 +54,10 @@ FORMATO DE OUTPUT:
 Retorne APENAS o código Prisma, sem explicações extras.
 Se não houver mudanças ao schema, retorne "NO_CHANGES".
 NÃO incluir markdown code blocks (sem \`\`\`).`;
-export class DatabaseDev {
+class DatabaseDev {
     model;
     constructor(model) {
-        this.model = model || getModelForDev('database');
+        this.model = model || (0, dev_config_1.getModelForDev)('database');
     }
     async generateCode(request) {
         const startTime = Date.now();
@@ -74,11 +77,11 @@ Descrição: ${request.fileDescription}
 Implemente o schema Prisma completo seguindo a arquitectura e regras técnicas.
 Se não houver mudanças necessárias, retorne "NO_CHANGES".
 Retorne APENAS o código, sem markdown code blocks, sem explicações.`;
-            devLog(`[Database] Gerando ${request.filePath}...`);
+            (0, dev_config_1.devLog)(`[Database] Gerando ${request.filePath}...`);
             // Gerar código
-            const rawCode = await ollama.generate(this.model, prompt, DATABASE_DEV_SYSTEM_PROMPT, getOllamaOptions());
+            const rawCode = await ollama_1.ollama.generate(this.model, prompt, DATABASE_DEV_SYSTEM_PROMPT, (0, dev_config_1.getOllamaOptions)());
             // Limpar markdown code blocks se existirem
-            const code = ollama.removeMarkdownCodeBlocks(rawCode).trim();
+            const code = ollama_1.ollama.removeMarkdownCodeBlocks(rawCode).trim();
             // Verificar se é NO_CHANGES
             if (code === 'NO_CHANGES' || code.includes('NO_CHANGES')) {
                 return {
@@ -105,3 +108,4 @@ Retorne APENAS o código, sem markdown code blocks, sem explicações.`;
         }
     }
 }
+exports.DatabaseDev = DatabaseDev;

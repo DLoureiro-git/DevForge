@@ -1,12 +1,23 @@
+"use strict";
 /**
  * DevForge V2 - Motor Principal de QA Inteligente
  * Gera checklists adaptativas baseadas no PRD e calcula scores de qualidade
  */
-import { chromium } from 'playwright';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.EMAIL_CHECKS = exports.FILE_UPLOAD_CHECKS = exports.REALTIME_CHECKS = exports.PAYMENT_CHECKS = exports.AUTH_CHECKS = exports.UNIVERSAL_CHECKS = void 0;
+exports.analyzePRD = analyzePRD;
+exports.generateAdaptiveChecklist = generateAdaptiveChecklist;
+exports.calculateQAScore = calculateQAScore;
+exports.initBrowser = initBrowser;
+exports.estimateTotalTime = estimateTotalTime;
+exports.groupChecksByCategory = groupChecksByCategory;
+exports.getAutomatableChecks = getAutomatableChecks;
+exports.getCriticalChecks = getCriticalChecks;
+const playwright_1 = require("playwright");
 // ============================================================================
 // CONSTANTS - UNIVERSAL CHECKS (SEMPRE EXECUTADOS)
 // ============================================================================
-export const UNIVERSAL_CHECKS = [
+exports.UNIVERSAL_CHECKS = [
     // DEPLOY
     {
         id: 'deploy-001',
@@ -244,7 +255,7 @@ export const UNIVERSAL_CHECKS = [
 // ============================================================================
 // CHECKS CONDICIONAIS (ATIVADOS POR PRD)
 // ============================================================================
-export const AUTH_CHECKS = [
+exports.AUTH_CHECKS = [
     {
         id: 'auth-001',
         category: 'auth',
@@ -286,7 +297,7 @@ export const AUTH_CHECKS = [
         prdTriggers: ['logout', 'sair'],
     },
 ];
-export const PAYMENT_CHECKS = [
+exports.PAYMENT_CHECKS = [
     {
         id: 'payment-001',
         category: 'security',
@@ -318,7 +329,7 @@ export const PAYMENT_CHECKS = [
         prdTriggers: ['pagamento', 'erro'],
     },
 ];
-export const REALTIME_CHECKS = [
+exports.REALTIME_CHECKS = [
     {
         id: 'realtime-001',
         category: 'performance',
@@ -350,7 +361,7 @@ export const REALTIME_CHECKS = [
         prdTriggers: ['realtime', 'reconnect'],
     },
 ];
-export const FILE_UPLOAD_CHECKS = [
+exports.FILE_UPLOAD_CHECKS = [
     {
         id: 'file-001',
         category: 'security',
@@ -382,7 +393,7 @@ export const FILE_UPLOAD_CHECKS = [
         prdTriggers: ['storage', 'segurança'],
     },
 ];
-export const EMAIL_CHECKS = [
+exports.EMAIL_CHECKS = [
     {
         id: 'email-001',
         category: 'code',
@@ -407,7 +418,7 @@ export const EMAIL_CHECKS = [
 // ============================================================================
 // PRD ANALYSIS
 // ============================================================================
-export function analyzePRD(prd) {
+function analyzePRD(prd) {
     const lowerPRD = prd.toLowerCase();
     const analysis = {
         hasAuth: false,
@@ -488,23 +499,23 @@ export function analyzePRD(prd) {
 // ============================================================================
 // ADAPTIVE CHECKLIST GENERATION
 // ============================================================================
-export function generateAdaptiveChecklist(prd) {
+function generateAdaptiveChecklist(prd) {
     const analysis = analyzePRD(prd);
-    const checklist = [...UNIVERSAL_CHECKS];
+    const checklist = [...exports.UNIVERSAL_CHECKS];
     if (analysis.hasAuth) {
-        checklist.push(...AUTH_CHECKS);
+        checklist.push(...exports.AUTH_CHECKS);
     }
     if (analysis.hasPayments) {
-        checklist.push(...PAYMENT_CHECKS);
+        checklist.push(...exports.PAYMENT_CHECKS);
     }
     if (analysis.hasRealtime) {
-        checklist.push(...REALTIME_CHECKS);
+        checklist.push(...exports.REALTIME_CHECKS);
     }
     if (analysis.hasFileUpload) {
-        checklist.push(...FILE_UPLOAD_CHECKS);
+        checklist.push(...exports.FILE_UPLOAD_CHECKS);
     }
     if (analysis.hasEmailNotifications) {
-        checklist.push(...EMAIL_CHECKS);
+        checklist.push(...exports.EMAIL_CHECKS);
     }
     // Sort por prioridade
     const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
@@ -520,7 +531,7 @@ const SEVERITY_WEIGHTS = {
     MEDIUM: 3,
     LOW: 1,
 };
-export function calculateQAScore(bugs) {
+function calculateQAScore(bugs) {
     const breakdown = {
         critical: 0,
         high: 0,
@@ -553,8 +564,8 @@ export function calculateQAScore(bugs) {
 // ============================================================================
 // BROWSER INITIALIZATION
 // ============================================================================
-export async function initBrowser(headless = true) {
-    return await chromium.launch({
+async function initBrowser(headless = true) {
+    return await playwright_1.chromium.launch({
         headless,
         args: ['--disable-dev-shm-usage'],
     });
@@ -562,10 +573,10 @@ export async function initBrowser(headless = true) {
 // ============================================================================
 // UTILITIES
 // ============================================================================
-export function estimateTotalTime(checklist) {
+function estimateTotalTime(checklist) {
     return checklist.reduce((acc, check) => acc + check.estimatedTime, 0);
 }
-export function groupChecksByCategory(checklist) {
+function groupChecksByCategory(checklist) {
     return checklist.reduce((acc, check) => {
         if (!acc[check.category]) {
             acc[check.category] = [];
@@ -574,9 +585,9 @@ export function groupChecksByCategory(checklist) {
         return acc;
     }, {});
 }
-export function getAutomatableChecks(checklist) {
+function getAutomatableChecks(checklist) {
     return checklist.filter(c => c.automatable);
 }
-export function getCriticalChecks(checklist) {
+function getCriticalChecks(checklist) {
     return checklist.filter(c => c.priority === 'critical');
 }

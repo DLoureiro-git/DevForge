@@ -1,22 +1,57 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
 // DevForge V2 — Features Routes
-import { Router } from 'express';
-import { prisma } from '../lib/prisma.js';
-import { AppError } from '../middleware/error.js';
-import { requireAuth } from '../middleware/auth.js';
-import { ensureProjectOwner } from '../middleware/multiTenant.js';
-import { ScrumMaster } from '../services/scrumMaster.js';
-const router = Router();
+const express_1 = require("express");
+const prisma_js_1 = require("../lib/prisma.js");
+const error_js_1 = require("../middleware/error.js");
+const auth_js_1 = require("../middleware/auth.js");
+const multiTenant_js_1 = require("../middleware/multiTenant.js");
+const scrumMaster_js_1 = require("../services/scrumMaster.js");
+const router = (0, express_1.Router)();
 // Helper to ensure param is string
 function getParamId(param) {
     return Array.isArray(param) ? param[0] : param;
 }
 // GET /api/projects/:id/features - List features with filters
-router.get('/:id/features', requireAuth, async (req, res, next) => {
+router.get('/:id/features', auth_js_1.requireAuth, async (req, res, next) => {
     try {
         const projectId = getParamId(req.params.id);
-        await ensureProjectOwner(projectId, req.user.id);
+        await (0, multiTenant_js_1.ensureProjectOwner)(projectId, req.user.id);
         const { status, sprint, assignedTo } = req.query;
-        const features = await prisma.feature.findMany({
+        const features = await prisma_js_1.prisma.feature.findMany({
             where: {
                 projectId,
                 ...(status && { status: status }),
@@ -62,38 +97,38 @@ router.get('/:id/features', requireAuth, async (req, res, next) => {
     }
 });
 // POST /api/projects/:id/features - Create new feature
-router.post('/:id/features', requireAuth, async (req, res, next) => {
+router.post('/:id/features', auth_js_1.requireAuth, async (req, res, next) => {
     try {
         const projectId = getParamId(req.params.id);
-        const project = await ensureProjectOwner(projectId, req.user.id);
+        const project = await (0, multiTenant_js_1.ensureProjectOwner)(projectId, req.user.id);
         const { title, description, acceptanceCriteria, priority, sprintId, assignedAgentId, requestedById, type, } = req.body;
         if (!title || !description || !requestedById) {
-            throw new AppError('Title, description, and requestedById are required', 400);
+            throw new error_js_1.AppError('Title, description, and requestedById are required', 400);
         }
         // Verify requestedBy team member exists and belongs to project
-        const teamMember = await prisma.teamMember.findFirst({
+        const teamMember = await prisma_js_1.prisma.teamMember.findFirst({
             where: {
                 id: requestedById,
                 projectId,
             },
         });
         if (!teamMember) {
-            throw new AppError('Requested team member not found', 404);
+            throw new error_js_1.AppError('Requested team member not found', 404);
         }
         // Auto-estimate story points using Scrum Master service
-        const settings = await prisma.settings.findUnique({
+        const settings = await prisma_js_1.prisma.settings.findUnique({
             where: { userId: req.user.id },
         });
         let storyPoints = 3; // default
         if (settings?.anthropicKey) {
-            const scrumMaster = new ScrumMaster(settings.anthropicKey);
+            const scrumMaster = new scrumMaster_js_1.ScrumMaster(settings.anthropicKey);
             storyPoints = await scrumMaster.estimateStoryPoints({
                 title,
                 description,
                 acceptanceCriteria: acceptanceCriteria || '',
             });
         }
-        const feature = await prisma.feature.create({
+        const feature = await prisma_js_1.prisma.feature.create({
             data: {
                 projectId,
                 title,
@@ -132,36 +167,36 @@ router.post('/:id/features', requireAuth, async (req, res, next) => {
     }
 });
 // PUT /api/projects/:id/features/:fid - Update feature
-router.put('/:id/features/:fid', requireAuth, async (req, res, next) => {
+router.put('/:id/features/:fid', auth_js_1.requireAuth, async (req, res, next) => {
     try {
         const projectId = getParamId(req.params.id);
         const featureId = getParamId(req.params.fid);
-        await ensureProjectOwner(projectId, req.user.id);
+        await (0, multiTenant_js_1.ensureProjectOwner)(projectId, req.user.id);
         const { title, description, acceptanceCriteria, status, priority, storyPoints, sprintId, assignedAgentId, agentProgress, qaScore, type, } = req.body;
         // Verify feature belongs to project
-        const existingFeature = await prisma.feature.findFirst({
+        const existingFeature = await prisma_js_1.prisma.feature.findFirst({
             where: {
                 id: featureId,
                 projectId,
             },
         });
         if (!existingFeature) {
-            throw new AppError('Feature not found', 404);
+            throw new error_js_1.AppError('Feature not found', 404);
         }
         // Check WIP limit if moving to IN_PROGRESS
         if (status === 'IN_PROGRESS' && existingFeature.status !== 'IN_PROGRESS') {
-            const settings = await prisma.settings.findUnique({
+            const settings = await prisma_js_1.prisma.settings.findUnique({
                 where: { userId: req.user.id },
             });
             if (settings?.anthropicKey) {
-                const scrumMaster = new ScrumMaster(settings.anthropicKey);
+                const scrumMaster = new scrumMaster_js_1.ScrumMaster(settings.anthropicKey);
                 const canMove = await scrumMaster.checkWIPLimit(projectId, 'IN_PROGRESS');
                 if (!canMove) {
-                    throw new AppError('WIP limit reached for IN_PROGRESS. Complete some features first.', 400);
+                    throw new error_js_1.AppError('WIP limit reached for IN_PROGRESS. Complete some features first.', 400);
                 }
             }
         }
-        const updated = await prisma.feature.update({
+        const updated = await prisma_js_1.prisma.feature.update({
             where: { id: featureId },
             data: {
                 title,
@@ -210,31 +245,31 @@ router.put('/:id/features/:fid', requireAuth, async (req, res, next) => {
     }
 });
 // DELETE /api/projects/:id/features/:fid - Delete feature
-router.delete('/:id/features/:fid', requireAuth, async (req, res, next) => {
+router.delete('/:id/features/:fid', auth_js_1.requireAuth, async (req, res, next) => {
     try {
         const projectId = getParamId(req.params.id);
         const featureId = getParamId(req.params.fid);
-        await ensureProjectOwner(projectId, req.user.id);
+        await (0, multiTenant_js_1.ensureProjectOwner)(projectId, req.user.id);
         // Verify feature belongs to project
-        const existingFeature = await prisma.feature.findFirst({
+        const existingFeature = await prisma_js_1.prisma.feature.findFirst({
             where: {
                 id: featureId,
                 projectId,
             },
         });
         if (!existingFeature) {
-            throw new AppError('Feature not found', 404);
+            throw new error_js_1.AppError('Feature not found', 404);
         }
         // Delete all comments first
-        await prisma.comment.deleteMany({
+        await prisma_js_1.prisma.comment.deleteMany({
             where: { featureId },
         });
         // Delete activity logs
-        await prisma.activityLog.deleteMany({
+        await prisma_js_1.prisma.activityLog.deleteMany({
             where: { featureId },
         });
         // Delete feature
-        await prisma.feature.delete({
+        await prisma_js_1.prisma.feature.delete({
             where: { id: featureId },
         });
         res.json({ success: true });
@@ -244,39 +279,39 @@ router.delete('/:id/features/:fid', requireAuth, async (req, res, next) => {
     }
 });
 // POST /api/projects/:id/features/:fid/start-build - Start building feature
-router.post('/:id/features/:fid/start-build', requireAuth, async (req, res, next) => {
+router.post('/:id/features/:fid/start-build', auth_js_1.requireAuth, async (req, res, next) => {
     try {
         const projectId = getParamId(req.params.id);
         const featureId = getParamId(req.params.fid);
-        const project = await ensureProjectOwner(projectId, req.user.id);
-        const feature = await prisma.feature.findFirst({
+        const project = await (0, multiTenant_js_1.ensureProjectOwner)(projectId, req.user.id);
+        const feature = await prisma_js_1.prisma.feature.findFirst({
             where: {
                 id: featureId,
                 projectId,
             },
         });
         if (!feature) {
-            throw new AppError('Feature not found', 404);
+            throw new error_js_1.AppError('Feature not found', 404);
         }
         if (feature.status !== 'BACKLOG' && feature.status !== 'READY' && feature.status !== 'IN_PROGRESS') {
-            throw new AppError('Feature cannot be built in current status', 400);
+            throw new error_js_1.AppError('Feature cannot be built in current status', 400);
         }
         // Verificar se project tem PRD e outputPath
         if (!project.prd) {
-            throw new AppError('Project must have PRD generated first. Run PM Agent on the project.', 400);
+            throw new error_js_1.AppError('Project must have PRD generated first. Run PM Agent on the project.', 400);
         }
         if (!project.outputPath) {
-            throw new AppError('Project must have code generated first. Run full pipeline on the project.', 400);
+            throw new error_js_1.AppError('Project must have code generated first. Run full pipeline on the project.', 400);
         }
         // Obter settings do user
-        const settings = await prisma.settings.findUnique({
+        const settings = await prisma_js_1.prisma.settings.findUnique({
             where: { userId: req.user.id },
         });
         if (!settings?.anthropicKey) {
-            throw new AppError('Anthropic API key not configured. Please configure in settings.', 400);
+            throw new error_js_1.AppError('Anthropic API key not configured. Please configure in settings.', 400);
         }
         // Update to IN_PROGRESS
-        const updated = await prisma.feature.update({
+        const updated = await prisma_js_1.prisma.feature.update({
             where: { id: featureId },
             data: {
                 status: 'IN_PROGRESS',
@@ -288,7 +323,7 @@ router.post('/:id/features/:fid/start-build', requireAuth, async (req, res, next
             },
         });
         // Disparar Feature Pipeline em background
-        const { runFeaturePipeline } = await import('../services/feature-orchestrator.js');
+        const { runFeaturePipeline } = await Promise.resolve().then(() => __importStar(require('../services/feature-orchestrator.js')));
         // Executar pipeline em background (não esperar resposta)
         runFeaturePipeline({
             featureId,
@@ -303,7 +338,7 @@ router.post('/:id/features/:fid/start-build', requireAuth, async (req, res, next
         }).catch((error) => {
             console.error(`[Feature Pipeline] Error for feature ${featureId}:`, error);
             // Atualizar feature para BLOCKED em caso de erro
-            prisma.feature
+            prisma_js_1.prisma.feature
                 .update({
                 where: { id: featureId },
                 data: {
@@ -332,36 +367,36 @@ router.post('/:id/features/:fid/start-build', requireAuth, async (req, res, next
     }
 });
 // POST /api/projects/:id/features/:fid/comment - Add comment to feature
-router.post('/:id/features/:fid/comment', requireAuth, async (req, res, next) => {
+router.post('/:id/features/:fid/comment', auth_js_1.requireAuth, async (req, res, next) => {
     try {
         const projectId = getParamId(req.params.id);
         const featureId = getParamId(req.params.fid);
-        await ensureProjectOwner(projectId, req.user.id);
+        await (0, multiTenant_js_1.ensureProjectOwner)(projectId, req.user.id);
         const { content, authorId } = req.body;
         if (!content || !authorId) {
-            throw new AppError('Comment content and authorId are required', 400);
+            throw new error_js_1.AppError('Comment content and authorId are required', 400);
         }
         // Verify feature belongs to project
-        const existingFeature = await prisma.feature.findFirst({
+        const existingFeature = await prisma_js_1.prisma.feature.findFirst({
             where: {
                 id: featureId,
                 projectId,
             },
         });
         if (!existingFeature) {
-            throw new AppError('Feature not found', 404);
+            throw new error_js_1.AppError('Feature not found', 404);
         }
         // Verify author is a team member of the project
-        const teamMember = await prisma.teamMember.findFirst({
+        const teamMember = await prisma_js_1.prisma.teamMember.findFirst({
             where: {
                 id: authorId,
                 projectId,
             },
         });
         if (!teamMember) {
-            throw new AppError('Author not found in project team', 404);
+            throw new error_js_1.AppError('Author not found in project team', 404);
         }
-        const comment = await prisma.comment.create({
+        const comment = await prisma_js_1.prisma.comment.create({
             data: {
                 featureId,
                 content,
@@ -382,4 +417,4 @@ router.post('/:id/features/:fid/comment', requireAuth, async (req, res, next) =>
         next(error);
     }
 });
-export default router;
+exports.default = router;

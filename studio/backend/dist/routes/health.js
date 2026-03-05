@@ -1,16 +1,18 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 // DevForge V2 — Health Check Routes
-import { Router } from 'express';
-import { prisma } from '../lib/prisma.js';
-import { checkAnthropicHealth } from '../lib/anthropic.js';
-import { checkOllamaHealth } from '../lib/ollama.js';
-const router = Router();
+const express_1 = require("express");
+const prisma_js_1 = require("../lib/prisma.js");
+const anthropic_js_1 = require("../lib/anthropic.js");
+const ollama_js_1 = require("../lib/ollama.js");
+const router = (0, express_1.Router)();
 // GET /api/health - Overall system health
 router.get('/', async (req, res) => {
     try {
         const [dbHealthy, anthropicHealthy, ollamaHealthy] = await Promise.all([
             checkDatabaseHealth(),
-            checkAnthropicHealth(),
-            checkOllamaHealth(),
+            (0, anthropic_js_1.checkAnthropicHealth)(),
+            (0, ollama_js_1.checkOllamaHealth)(),
         ]);
         const status = dbHealthy && anthropicHealthy && ollamaHealthy ? 'healthy' : 'degraded';
         res.json({
@@ -33,7 +35,7 @@ router.get('/', async (req, res) => {
 // GET /api/health/ollama
 router.get('/ollama', async (req, res) => {
     try {
-        const healthy = await checkOllamaHealth();
+        const healthy = await (0, ollama_js_1.checkOllamaHealth)();
         res.json({
             status: healthy ? 'up' : 'down',
             url: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
@@ -49,7 +51,7 @@ router.get('/ollama', async (req, res) => {
 // GET /api/health/anthropic
 router.get('/anthropic', async (req, res) => {
     try {
-        const healthy = await checkAnthropicHealth();
+        const healthy = await (0, anthropic_js_1.checkAnthropicHealth)();
         res.json({
             status: healthy ? 'up' : 'down',
             configured: !!process.env.ANTHROPIC_API_KEY,
@@ -80,11 +82,11 @@ router.get('/db', async (req, res) => {
 });
 async function checkDatabaseHealth() {
     try {
-        await prisma.$queryRaw `SELECT 1`;
+        await prisma_js_1.prisma.$queryRaw `SELECT 1`;
         return true;
     }
     catch {
         return false;
     }
 }
-export default router;
+exports.default = router;

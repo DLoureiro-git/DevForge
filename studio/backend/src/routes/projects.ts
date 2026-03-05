@@ -242,12 +242,21 @@ router.post('/:id/confirm', requireAuth, async (req: AuthRequest, res, next) => 
     });
 
     // Execute pipeline in background
-    pipeline.run().catch((error) => {
+    pipeline.run().catch(async (error) => {
       console.error(`[Pipeline] Error for project ${project.id}:`, error);
-      prisma.project.update({
+
+      // Verificar se projeto ainda existe antes de actualizar
+      const exists = await prisma.project.findUnique({
         where: { id: project.id },
-        data: { status: 'FAILED' },
       });
+
+      if (exists) {
+        await prisma.project.update({
+          where: { id: project.id },
+          data: { status: 'FAILED' },
+        });
+      }
+
       sseManager.send(project.id, {
         type: 'error',
         error: error.message,

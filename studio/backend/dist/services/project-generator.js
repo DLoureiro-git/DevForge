@@ -1,3 +1,4 @@
+"use strict";
 /**
  * PROJECT GENERATOR — Cria Estrutura de Projecto Independente
  *
@@ -10,13 +11,19 @@
  * - .gitignore
  * - Zip do projecto
  */
-import { mkdirSync, writeFileSync, existsSync, readdirSync, statSync } from 'fs';
-import { join } from 'path';
-import archiver from 'archiver';
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProjectGenerator = void 0;
+exports.generateCompleteProject = generateCompleteProject;
+const fs_1 = require("fs");
+const path_1 = require("path");
+const archiver_1 = __importDefault(require("archiver"));
 // ============================================================================
 // PROJECT GENERATOR
 // ============================================================================
-export class ProjectGenerator {
+class ProjectGenerator {
     /**
      * Criar estrutura completa do projecto
      */
@@ -26,9 +33,9 @@ export class ProjectGenerator {
         // Criar pastas baseadas em architecture.fileStructure
         const folders = Object.keys(architecture.fileStructure || {});
         for (const folder of folders) {
-            const folderPath = join(outputPath, folder);
-            if (!existsSync(folderPath)) {
-                mkdirSync(folderPath, { recursive: true });
+            const folderPath = (0, path_1.join)(outputPath, folder);
+            if (!(0, fs_1.existsSync)(folderPath)) {
+                (0, fs_1.mkdirSync)(folderPath, { recursive: true });
                 console.log(`  ✅ ${folder}`);
             }
         }
@@ -41,9 +48,9 @@ export class ProjectGenerator {
             'public'
         ];
         for (const folder of essentialFolders) {
-            const folderPath = join(outputPath, folder);
-            if (!existsSync(folderPath)) {
-                mkdirSync(folderPath, { recursive: true });
+            const folderPath = (0, path_1.join)(outputPath, folder);
+            if (!(0, fs_1.existsSync)(folderPath)) {
+                (0, fs_1.mkdirSync)(folderPath, { recursive: true });
             }
         }
         console.log('✅ Estrutura de pastas criada');
@@ -110,8 +117,8 @@ export class ProjectGenerator {
                 npm: '>=10.0.0'
             }
         };
-        const filePath = join(outputPath, 'package.json');
-        writeFileSync(filePath, JSON.stringify(packageJson, null, 2), 'utf-8');
+        const filePath = (0, path_1.join)(outputPath, 'package.json');
+        (0, fs_1.writeFileSync)(filePath, JSON.stringify(packageJson, null, 2), 'utf-8');
         console.log('✅ package.json criado');
     }
     /**
@@ -154,8 +161,8 @@ export class ProjectGenerator {
             envVars.push('BLOB_READ_WRITE_TOKEN="vercel_blob_..."');
             envVars.push('');
         }
-        const filePath = join(outputPath, '.env.example');
-        writeFileSync(filePath, envVars.join('\n'), 'utf-8');
+        const filePath = (0, path_1.join)(outputPath, '.env.example');
+        (0, fs_1.writeFileSync)(filePath, envVars.join('\n'), 'utf-8');
         console.log('✅ .env.example criado');
     }
     /**
@@ -278,8 +285,8 @@ Executar \`npm run db:push\` antes de \`npm run build\`
 
 **Gerado por DevForge V2**
 `;
-        const filePath = join(outputPath, 'README.md');
-        writeFileSync(filePath, readme, 'utf-8');
+        const filePath = (0, path_1.join)(outputPath, 'README.md');
+        (0, fs_1.writeFileSync)(filePath, readme, 'utf-8');
         console.log('✅ README.md criado');
     }
     /**
@@ -333,8 +340,8 @@ ENV HOSTNAME "0.0.0.0"
 
 CMD ["node", "server.js"]
 `;
-        const filePath = join(outputPath, 'Dockerfile');
-        writeFileSync(filePath, dockerfile, 'utf-8');
+        const filePath = (0, path_1.join)(outputPath, 'Dockerfile');
+        (0, fs_1.writeFileSync)(filePath, dockerfile, 'utf-8');
         console.log('✅ Dockerfile criado');
     }
     /**
@@ -379,8 +386,8 @@ next-env.d.ts
 # prisma
 prisma/migrations/
 `;
-        const filePath = join(outputPath, '.gitignore');
-        writeFileSync(filePath, gitignore, 'utf-8');
+        const filePath = (0, path_1.join)(outputPath, '.gitignore');
+        (0, fs_1.writeFileSync)(filePath, gitignore, 'utf-8');
         console.log('✅ .gitignore criado');
     }
     /**
@@ -389,21 +396,21 @@ prisma/migrations/
     async zipProject(projectPath) {
         return new Promise((resolve, reject) => {
             const chunks = [];
-            const archive = archiver('zip', { zlib: { level: 9 } });
+            const archive = (0, archiver_1.default)('zip', { zlib: { level: 9 } });
             archive.on('data', (chunk) => chunks.push(chunk));
             archive.on('end', () => resolve(Buffer.concat(chunks)));
             archive.on('error', reject);
             // Adicionar todos os ficheiros (exceto node_modules, .next, etc.)
             const excludePatterns = ['node_modules', '.next', '.git', 'dist', 'build', 'out'];
             const addDirectory = (dirPath, zipPath = '') => {
-                const files = readdirSync(dirPath);
+                const files = (0, fs_1.readdirSync)(dirPath);
                 for (const file of files) {
-                    const fullPath = join(dirPath, file);
-                    const relPath = zipPath ? join(zipPath, file) : file;
+                    const fullPath = (0, path_1.join)(dirPath, file);
+                    const relPath = zipPath ? (0, path_1.join)(zipPath, file) : file;
                     if (excludePatterns.includes(file)) {
                         continue;
                     }
-                    const stat = statSync(fullPath);
+                    const stat = (0, fs_1.statSync)(fullPath);
                     if (stat.isDirectory()) {
                         addDirectory(fullPath, relPath);
                     }
@@ -442,10 +449,11 @@ prisma/migrations/
         return output;
     }
 }
+exports.ProjectGenerator = ProjectGenerator;
 /**
  * Helper standalone
  */
-export async function generateCompleteProject(config) {
+async function generateCompleteProject(config) {
     const generator = new ProjectGenerator();
     generator.createProjectStructure(config);
     generator.generatePackageJson(config.prd, config.outputPath);

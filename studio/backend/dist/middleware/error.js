@@ -1,4 +1,9 @@
-export function errorHandler(err, req, res, 
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AppError = void 0;
+exports.errorHandler = errorHandler;
+exports.notFound = notFound;
+function errorHandler(err, req, res, 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 next) {
     const statusCode = err.statusCode || 500;
@@ -15,13 +20,13 @@ next) {
         ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
     });
 }
-export function notFound(req, res) {
+function notFound(req, res) {
     res.status(404).json({
         error: 'Not Found',
         path: req.path,
     });
 }
-export class AppError extends Error {
+class AppError extends Error {
     statusCode;
     isOperational;
     constructor(message, statusCode = 500, isOperational = true) {
@@ -31,3 +36,4 @@ export class AppError extends Error {
         Error.captureStackTrace(this, this.constructor);
     }
 }
+exports.AppError = AppError;
