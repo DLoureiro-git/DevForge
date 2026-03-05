@@ -1,0 +1,21 @@
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+trace.zip
+test-results.json
+
+# Screenshots
+screenshots/
+*.png
+
+# Videos
+videos/
+*.webm
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Logs
+*.log

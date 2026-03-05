@@ -1,0 +1,178 @@
+// DevForge V2 — Database Schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String?
+  plan      Plan      @default(FREE)
+  projects  Project[]
+  settings  Settings?
+  createdAt DateTime  @default(now())
+}
+
+model Project {
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  name         String
+  description  String        // prompt original do utilizador
+  status       ProjectStatus @default(INTAKE)
+  prd          Json?         // Product Requirements Document gerado pelo PM Agent
+  architecture Json?         // Decisões de arquitectura do Architect Agent
+  qaReport     Json?         // Relatório QA mais recente
+  qaScore      Float?        // 0-100
+  loopCount    Int           @default(0)
+  outputPath   String?       // path local do código gerado
+  deployUrl    String?       // URL do produto deployado
+  repoUrl      String?       // URL do repositório
+  estimatedMin Int?          // tempo estimado em minutos
+  actualMin    Int?          // tempo real em minutos
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  phases       Phase[]
+  bugs         Bug[]
+  messages     Message[]     // conversa com PM Agent
+}
+
+model Message {
+  id        String      @id @default(cuid())
+  projectId String
+  project   Project     @relation(fields: [projectId], references: [id])
+  role      MessageRole // USER | AGENT | SYSTEM
+  content   String
+  metadata  Json?       // ex: { "questionType": "MANDATORY", "answered": true }
+  createdAt DateTime    @default(now())
+}
+
+model Phase {
+  id              String      @id @default(cuid())
+  projectId       String
+  project         Project     @relation(fields: [projectId], references: [id])
+  type            PhaseType
+  status          PhaseStatus @default(PENDING)
+  startedAt       DateTime?
+  finishedAt      DateTime?
+  durationSec     Int?
+  summary         String?     // resumo legível para o utilizador
+  technicalOutput String?     // output técnico completo (escondido por defeito)
+  logs            Log[]
+}
+
+model Bug {
+  id          String      @id @default(cuid())
+  projectId   String
+  project     Project     @relation(fields: [projectId], references: [id])
+  severity    BugSeverity
+  category    BugCategory
+  description String      // técnico (para o agente)
+  userMessage String?     // versão simplificada (para mostrar ao utilizador)
+  file        String?
+  line        Int?
+  fixed       Boolean     @default(false)
+  fixAttempts Int         @default(0)
+  createdAt   DateTime    @default(now())
+  fixedAt     DateTime?
+}
+
+model Log {
+  id        String   @id @default(cuid())
+  phaseId   String
+  phase     Phase    @relation(fields: [phaseId], references: [id])
+  timestamp DateTime @default(now())
+  level     LogLevel
+  message   String   // técnico
+  userMsg   String?  // simplificado para mostrar ao utilizador
+}
+
+model Settings {
+  id              String  @id @default(cuid())
+  userId          String  @unique
+  user            User    @relation(fields: [userId], references: [id])
+  anthropicKey    String?
+  ollamaUrl       String  @default("http://localhost:11434")
+  ollamaModelDev  String  @default("qwen2.5-coder:32b")
+  ollamaModelFix  String  @default("qwen2.5-coder:14b")
+  outputDirectory String  @default("./generated-projects")
+  notifyEmail     Boolean @default(true)
+  notifyDesktop   Boolean @default(true)
+  deployTarget    String  @default("vercel+railway")
+}
+
+enum Plan {
+  FREE
+  PRO
+  AGENCY
+}
+
+enum ProjectStatus {
+  INTAKE
+  PLANNING
+  BUILDING
+  QA
+  FIXING
+  DEPLOYING
+  DELIVERED
+  FAILED
+  PAUSED
+}
+
+enum PhaseType {
+  PM
+  ARCHITECT
+  FRONTEND
+  BACKEND
+  DATABASE
+  INTEGRATION
+  QA
+  BUGFIX
+  DELIVERY
+  DEPLOY
+}
+
+enum PhaseStatus {
+  PENDING
+  RUNNING
+  DONE
+  ERROR
+  SKIPPED
+}
+
+enum MessageRole {
+  USER
+  AGENT
+  SYSTEM
+}
+
+enum BugSeverity {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum BugCategory {
+  RESPONSIVE
+  DB_CONNECTION
+  BUTTON
+  FORM
+  CONSOLE_ERROR
+  PERFORMANCE
+  SECURITY
+  ACCESSIBILITY
+}
+
+enum LogLevel {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+  SUCCESS
+}
