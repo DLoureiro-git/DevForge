@@ -4,7 +4,9 @@ interface ApiError {
 }
 
 class ApiClient {
-  private baseUrl = '/api'
+  private baseUrl = import.meta.env.VITE_API_URL
+    ? `${import.meta.env.VITE_API_URL}/api`
+    : '/api'
 
   private async request<T>(
     endpoint: string,
