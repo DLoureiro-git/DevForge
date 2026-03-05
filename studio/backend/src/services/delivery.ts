@@ -8,10 +8,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk'
-
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY
-})
+import { createAnthropicClient } from '../lib/anthropic'
 
 // ============================================================================
 // TYPES
@@ -159,6 +156,14 @@ Gera JSON estruturado com todas as secções.
 Depois converte para DELIVERY.md em Markdown.`
 
 export class DeliveryAgent {
+  private client: Anthropic
+
+  constructor(apiKey?: string) {
+    this.client = apiKey
+      ? createAnthropicClient(apiKey)
+      : new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  }
+
   /**
    * Gerar documentação de delivery completa
    */
@@ -169,7 +174,7 @@ export class DeliveryAgent {
     qaResults: any,
     bugFixResults?: any
   ): Promise<DeliveryDocumentation> {
-    const response = await client.messages.create({
+    const response = await this.client.messages.create({
       model: 'claude-opus-4-6',
       max_tokens: 32768,
       system: DELIVERY_SYSTEM_PROMPT,

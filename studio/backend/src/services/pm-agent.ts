@@ -7,10 +7,7 @@
 
 import Anthropic from '@anthropic-ai/sdk'
 import type { Message, Project } from '@prisma/client'
-
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY
-})
+import { createAnthropicClient } from '../lib/anthropic'
 
 // Tipos de perguntas
 type QuestionType = 'MANDATORY' | 'CONDITIONAL' | 'DESIGN'
@@ -145,8 +142,15 @@ Depois, determina qual é a próxima pergunta relevante e faz-a.
 NÃO geres PRD até receberes confirmação explícita do utilizador após o resumo final.`
 
 export class PMAgent {
+  private client: Anthropic
   private answers: Record<string, any> = {}
   private currentQuestionIndex = 0
+
+  constructor(apiKey?: string) {
+    this.client = apiKey
+      ? createAnthropicClient(apiKey)
+      : new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  }
 
   /**
    * Processar mensagem do utilizador no fluxo de intake
@@ -262,7 +266,7 @@ export class PMAgent {
     question: Question
   ): Promise<{ valid: boolean; acknowledgment?: string; clarification?: string }> {
     try {
-      const response = await client.messages.create({
+      const response = await this.client.messages.create({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 300,
         system: SYSTEM_PROMPT,
@@ -438,7 +442,7 @@ Vou-te notificar quando estiver pronto!
    * Gerar PRD final em JSON
    */
   private async generatePRD(): Promise<any> {
-    const response = await client.messages.create({
+    const response = await this.client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 8000,
       system: `Gera um PRD (Product Requirements Document) completo em JSON com base nas respostas do utilizador.

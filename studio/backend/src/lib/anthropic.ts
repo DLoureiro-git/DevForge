@@ -14,6 +14,17 @@ export const anthropic =
 
 if (process.env.NODE_ENV !== 'production') globalForAnthropic.anthropic = anthropic;
 
+/**
+ * Cria um cliente Anthropic com a API Key do utilizador
+ * @param userApiKey - API Key fornecida pelo utilizador
+ */
+export function createAnthropicClient(userApiKey: string): Anthropic {
+  return new Anthropic({
+    apiKey: userApiKey,
+    maxRetries: 3,
+  });
+}
+
 export async function checkAnthropicHealth(): Promise<boolean> {
   if (!process.env.ANTHROPIC_API_KEY) {
     return false;
