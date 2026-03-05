@@ -166,7 +166,7 @@ export class Pipeline {
             await this.startPhase('DELIVERY');
             await this.updateProjectStatus(ProjectStatus.DEPLOYING);
             this.log('INFO', '📦 Delivery Agent a preparar documentação...', 'A preparar entrega...');
-            const deliveryAgent = new DeliveryAgent();
+            const deliveryAgent = new DeliveryAgent(this.config.claudeApiKey);
             const deliveryDoc = await deliveryAgent.generateDeliveryDoc(prd, architecture, codeResult, qaResults, bugFixResults);
             this.log('SUCCESS', '✅ DELIVERY.md gerado');
             // Gravar DELIVERY.md no disco

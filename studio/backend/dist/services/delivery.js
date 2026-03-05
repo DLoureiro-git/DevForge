@@ -7,9 +7,7 @@
  * - Aprovação para produção
  */
 import Anthropic from '@anthropic-ai/sdk';
-const client = new Anthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY
-});
+import { createAnthropicClient } from '../lib/anthropic';
 // ============================================================================
 // DELIVERY AGENT
 // ============================================================================
@@ -77,11 +75,17 @@ A tua missão é preparar documentação completa e checklist de entrega para pr
 Gera JSON estruturado com todas as secções.
 Depois converte para DELIVERY.md em Markdown.`;
 export class DeliveryAgent {
+    client;
+    constructor(apiKey) {
+        this.client = apiKey
+            ? createAnthropicClient(apiKey)
+            : new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    }
     /**
      * Gerar documentação de delivery completa
      */
     async generateDeliveryDoc(prd, architecture, code, qaResults, bugFixResults) {
-        const response = await client.messages.create({
+        const response = await this.client.messages.create({
             model: 'claude-opus-4-6',
             max_tokens: 32768,
             system: DELIVERY_SYSTEM_PROMPT,

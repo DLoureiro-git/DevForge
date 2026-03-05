@@ -7,6 +7,8 @@ import { sseManager } from '../lib/sse.js';
 import archiver from 'archiver';
 import { existsSync, statSync } from 'fs';
 import path from 'path';
+import { PMAgent } from '../services/pm-agent.js';
+import { Pipeline } from '../services/orchestrator.js';
 
 const router = Router();
 
@@ -144,20 +146,53 @@ router.post('/:id/chat', requireAuth, async (req: AuthRequest, res, next) => {
       },
     });
 
-    // TODO: Send to PM Agent and get response
+    // Get user's Anthropic API Key from Settings
+    const settings = await prisma.settings.findUnique({
+      where: { userId: req.user!.id },
+    });
 
-    // Mock agent response
+    const userApiKey = settings?.anthropicKey;
+    if (!userApiKey) {
+      throw new AppError('API Key not configured. Please add your Anthropic API Key in Settings.', 400);
+    }
+
+    // Get all messages for context
+    const allMessages = await prisma.message.findMany({
+      where: { projectId: project.id },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    // Send to PM Agent
+    const pmAgent = new PMAgent(userApiKey);
+    const pmResponse = await pmAgent.processMessage(content, allMessages);
+
+    // Save agent response
     const agentMessage = await prisma.message.create({
       data: {
         projectId: project.id,
         role: 'AGENT',
-        content: 'Understood. Let me process that...',
+        content: pmResponse.agentResponse,
       },
     });
+
+    // If intake complete, save PRD
+    if (pmResponse.isComplete && pmResponse.prd) {
+      await prisma.project.update({
+        where: { id: project.id },
+        data: {
+          prd: pmResponse.prd,
+          status: 'PLANNING',
+          estimatedMin: pmResponse.prd.estimatedMinutes,
+        },
+      });
+    }
 
     res.json({
       userMessage,
       agentMessage,
+      isComplete: pmResponse.isComplete,
+      prd: pmResponse.prd,
+      quickReplies: pmResponse.nextQuestion?.quickReplies,
     });
   } catch (error) {
     next(error);
@@ -192,7 +227,32 @@ router.post('/:id/confirm', requireAuth, async (req: AuthRequest, res, next) => 
       data: { status: 'BUILDING' },
     });
 
-    // TODO: Trigger build pipeline
+    // Get user settings for API Key and Ollama config
+    const settings = await prisma.settings.findUnique({
+      where: { userId: req.user!.id },
+    });
+
+    // Trigger build pipeline
+    const pipeline = new Pipeline({
+      projectId: project.id,
+      claudeApiKey: settings?.anthropicKey,
+      ollamaEndpoint: settings?.ollamaUrl,
+      ollamaModel: settings?.ollamaModelDev,
+      outputDirectory: settings?.outputDirectory,
+    });
+
+    // Execute pipeline in background
+    pipeline.run().catch((error) => {
+      console.error(`[Pipeline] Error for project ${project.id}:`, error);
+      prisma.project.update({
+        where: { id: project.id },
+        data: { status: 'FAILED' },
+      });
+      sseManager.send(project.id, {
+        type: 'error',
+        error: error.message,
+      });
+    });
 
     sseManager.send(project.id, {
       type: 'status',
