@@ -20,15 +20,29 @@ function getParamId(param) {
     return Array.isArray(param) ? param[0] : param;
 }
 // POST /api/projects - Create new project and start intake
-router.post('/', auth_js_1.requireAuth, async (req, res, next) => {
+router.post('/', auth_js_1.extractUser, async (req, res, next) => {
     try {
         const { name, description } = req.body;
         if (!name || !description) {
             throw new error_js_1.AppError('Name and description are required', 400);
         }
+        // Se não houver user, criar/usar demo user
+        let userId = req.user?.id;
+        if (!userId) {
+            const demoUser = await prisma_js_1.prisma.user.upsert({
+                where: { email: 'demo@devforge.local' },
+                update: {},
+                create: {
+                    email: 'demo@devforge.local',
+                    name: 'Demo User',
+                    plan: 'FREE',
+                },
+            });
+            userId = demoUser.id;
+        }
         const project = await prisma_js_1.prisma.project.create({
             data: {
-                userId: req.user.id,
+                userId,
                 name,
                 description,
                 status: 'INTAKE',
@@ -54,10 +68,12 @@ router.post('/', auth_js_1.requireAuth, async (req, res, next) => {
     }
 });
 // GET /api/projects - List user's projects
-router.get('/', auth_js_1.requireAuth, async (req, res, next) => {
+router.get('/', auth_js_1.extractUser, async (req, res, next) => {
     try {
+        // Se não houver user, listar todos os projectos (demo mode)
+        const whereClause = req.user?.id ? { userId: req.user.id } : {};
         const projects = await prisma_js_1.prisma.project.findMany({
-            where: { userId: req.user.id },
+            where: whereClause,
             include: {
                 phases: {
                     orderBy: { startedAt: 'asc' },

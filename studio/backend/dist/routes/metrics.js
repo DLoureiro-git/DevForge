@@ -6,10 +6,12 @@ const prisma_js_1 = require("../lib/prisma.js");
 const auth_js_1 = require("../middleware/auth.js");
 const router = (0, express_1.Router)();
 // GET /api/metrics - Get user's project metrics
-router.get('/', auth_js_1.requireAuth, async (req, res, next) => {
+router.get('/', auth_js_1.extractUser, async (req, res, next) => {
     try {
+        // Se não houver user, retornar métricas globais
+        const whereClause = req.user?.id ? { userId: req.user.id } : {};
         const projects = await prisma_js_1.prisma.project.findMany({
-            where: { userId: req.user.id },
+            where: whereClause,
             select: {
                 status: true,
                 actualMin: true,
