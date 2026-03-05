@@ -1,12 +1,12 @@
 // DevForge V2 — Metrics Routes
 import { Router } from 'express';
 import { prisma } from '../lib/prisma.js';
-import { requireAuth, type AuthRequest } from '../middleware/auth.js';
+import { extractUser, type AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
 
 // GET /api/metrics - Get user's project metrics
-router.get('/', async (req: AuthRequest, res, next) => {
+router.get('/', extractUser, async (req: AuthRequest, res, next) => {
   try {
     // Se não houver user, retornar métricas globais
     const whereClause = req.user?.id ? { userId: req.user.id } : {};

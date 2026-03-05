@@ -2,7 +2,7 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma.js';
 import { AppError } from '../middleware/error.js';
-import { requireAuth, type AuthRequest } from '../middleware/auth.js';
+import { requireAuth, extractUser, type AuthRequest } from '../middleware/auth.js';
 import { sseManager } from '../lib/sse.js';
 import archiver from 'archiver';
 import { existsSync, statSync } from 'fs';
@@ -18,7 +18,7 @@ function getParamId(param: string | string[]): string {
 }
 
 // POST /api/projects - Create new project and start intake
-router.post('/', async (req: AuthRequest, res, next) => {
+router.post('/', extractUser, async (req: AuthRequest, res, next) => {
   try {
     const { name, description } = req.body;
 
@@ -72,7 +72,7 @@ router.post('/', async (req: AuthRequest, res, next) => {
 });
 
 // GET /api/projects - List user's projects
-router.get('/', async (req: AuthRequest, res, next) => {
+router.get('/', extractUser, async (req: AuthRequest, res, next) => {
   try {
     // Se não houver user, listar todos os projectos (demo mode)
     const whereClause = req.user?.id ? { userId: req.user.id } : {};
