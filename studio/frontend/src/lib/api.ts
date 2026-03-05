@@ -1,3 +1,5 @@
+import { useStore } from './store'
+
 interface ApiError {
   message: string
   code?: string
@@ -8,6 +10,20 @@ class ApiClient {
     ? `${import.meta.env.VITE_API_URL}/api`
     : '/api'
 
+  private getHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    }
+
+    // Adicionar x-user-id se user estiver autenticado
+    const user = useStore.getState().user
+    if (user?.id) {
+      headers['x-user-id'] = user.id
+    }
+
+    return headers
+  }
+
   private async request<T>(
     endpoint: string,
     options?: RequestInit
@@ -16,7 +32,7 @@ class ApiClient {
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         ...options,
         headers: {
-          'Content-Type': 'application/json',
+          ...this.getHeaders(),
           ...options?.headers,
         },
       })
@@ -130,6 +146,18 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify({ model }),
     })
+  }
+
+  // Auth
+  async register(data: { email: string; name?: string; password: string }) {
+    return this.request<{ user: any }>('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async getMe() {
+    return this.request<any>('/auth/me')
   }
 
   // Metrics

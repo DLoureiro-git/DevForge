@@ -3,8 +3,28 @@ import { Dashboard } from './pages/Dashboard'
 import { ProjectView } from './pages/ProjectView'
 import { Settings } from './pages/Settings'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { useAutoAuth } from './hooks/useAutoAuth'
 
 function App() {
+  // Inicializar autenticação automática
+  const { user } = useAutoAuth()
+
+  // Mostrar loading enquanto inicializa auth
+  if (!user) {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        fontFamily: 'system-ui, sans-serif',
+        color: '#666',
+      }}>
+        A inicializar DevForge V2...
+      </div>
+    )
+  }
+
   return (
     <ErrorBoundary>
       <BrowserRouter>
