@@ -17,6 +17,7 @@ import teamRoutes from './routes/team.js';
 import settingsRoutes from './routes/settings.js';
 import healthRoutes from './routes/health.js';
 import ollamaRoutes from './routes/ollama.js';
+import metricsRoutes from './routes/metrics.js';
 
 dotenv.config();
 
@@ -86,6 +87,7 @@ app.use('/api/projects', teamRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/ollama', ollamaRoutes);
+app.use('/api/metrics', metricsRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {

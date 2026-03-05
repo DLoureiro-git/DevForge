@@ -330,7 +330,8 @@ function NewProjectModal({ onClose, onCreated }: { onClose: () => void; onCreate
   const [prompt, setPrompt] = useState("");
   const [creating, setCreating] = useState(false);
 
-  const handleCreate = async () => {
+  const handleCreate = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!prompt.trim()) return;
 
     setCreating(true);
@@ -339,11 +340,12 @@ function NewProjectModal({ onClose, onCreated }: { onClose: () => void; onCreate
         name: prompt.substring(0, 50),
         description: prompt,
       });
+      alert("Projeto criado com sucesso!");
       onCreated();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to create project:", error);
-      alert("Erro ao criar projecto. Tenta novamente.");
+      alert(`Erro ao criar projecto: ${error.message || "Tenta novamente."}`);
     } finally {
       setCreating(false);
     }
@@ -358,68 +360,72 @@ function NewProjectModal({ onClose, onCreated }: { onClose: () => void; onCreate
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
       <div className="card fade-up" style={{ width: 520, borderColor: "rgba(124,106,250,0.3)", padding: 24 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
-          <div>
-            <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 700 }}>Novo Projecto</h3>
-            <p style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>
-              Descreve a tua ideia — sem tecnicismos, em português
-            </p>
+        <form onSubmit={handleCreate}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+            <div>
+              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 700 }}>Novo Projecto</h3>
+              <p style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>
+                Descreve a tua ideia — sem tecnicismos, em português
+              </p>
+            </div>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={onClose} style={{ padding: 6 }}>
+              <Icon d={icons.x} size={14} />
+            </button>
           </div>
-          <button className="btn btn-ghost btn-sm" onClick={onClose} style={{ padding: 6 }}>
-            <Icon d={icons.x} size={14} />
-          </button>
-        </div>
 
-        <textarea
-          className="input"
-          placeholder="Ex: Quero uma app para gerir as reservas do meu restaurante..."
-          value={prompt}
-          onChange={e => setPrompt(e.target.value)}
-          style={{ minHeight: 100, resize: "none", lineHeight: 1.6 }}
-        />
+          <textarea
+            className="input"
+            placeholder="Ex: Quero uma app para gerir as reservas do meu restaurante..."
+            value={prompt}
+            onChange={e => setPrompt(e.target.value)}
+            style={{ minHeight: 100, resize: "none", lineHeight: 1.6 }}
+            required
+          />
 
-        <div style={{ marginTop: 14, marginBottom: 18 }}>
-          <div style={{ fontSize: 11, color: "var(--text-faint)", marginBottom: 8 }}>Exemplos:</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-            {examples.map(ex => (
-              <button
-                key={ex}
-                onClick={() => setPrompt(ex)}
-                style={{
-                  background: "none",
-                  border: "1px solid var(--border)",
-                  borderRadius: 6,
-                  padding: "7px 10px",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  fontSize: 11,
-                  color: "var(--text-dim)",
-                  transition: "all 0.15s",
-                }}
-              >
-                {ex}
-              </button>
-            ))}
+          <div style={{ marginTop: 14, marginBottom: 18 }}>
+            <div style={{ fontSize: 11, color: "var(--text-faint)", marginBottom: 8 }}>Exemplos:</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+              {examples.map(ex => (
+                <button
+                  key={ex}
+                  type="button"
+                  onClick={() => setPrompt(ex)}
+                  style={{
+                    background: "none",
+                    border: "1px solid var(--border)",
+                    borderRadius: 6,
+                    padding: "7px 10px",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    fontSize: 11,
+                    color: "var(--text-dim)",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {ex}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-          <button className="btn btn-secondary" onClick={onClose} disabled={creating}>
-            Cancelar
-          </button>
-          <button className="btn btn-primary" disabled={!prompt.trim() || creating} onClick={handleCreate}>
-            {creating ? (
-              <>
-                <div className="spin"><Icon d={icons.loader} size={14} /></div>
-                A criar...
-              </>
-            ) : (
-              <>
-                <Icon d={icons.sparkles} size={14} /> Criar Projecto
-              </>
-            )}
-          </button>
-        </div>
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={creating}>
+              Cancelar
+            </button>
+            <button type="submit" className="btn btn-primary" disabled={!prompt.trim() || creating}>
+              {creating ? (
+                <>
+                  <div className="spin"><Icon d={icons.loader} size={14} /></div>
+                  A criar...
+                </>
+              ) : (
+                <>
+                  <Icon d={icons.sparkles} size={14} /> Criar Projecto
+                </>
+              )}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
