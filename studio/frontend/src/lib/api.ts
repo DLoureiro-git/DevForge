@@ -6,9 +6,22 @@ interface ApiError {
 }
 
 class ApiClient {
-  private baseUrl = import.meta.env.VITE_API_URL
-    ? `${import.meta.env.VITE_API_URL}/api`
-    : '/api'
+  private baseUrl = this.getApiUrl()
+
+  private getApiUrl(): string {
+    // 1. Usar variável de ambiente se disponível
+    if (import.meta.env.VITE_API_URL) {
+      return `${import.meta.env.VITE_API_URL}/api`
+    }
+
+    // 2. Se estamos em Railway production, usar URL hardcoded
+    if (window.location.hostname.includes('railway.app')) {
+      return 'https://brilliant-appreciation-production.up.railway.app/api'
+    }
+
+    // 3. Fallback para proxy local
+    return '/api'
+  }
 
   private getHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
