@@ -102,6 +102,34 @@ class ApiClient {
     )
   }
 
+  // Ollama
+  async getOllamaStatus() {
+    return this.request<{
+      installed: boolean
+      running: boolean
+      models: string[]
+      url: string
+    }>('/ollama/status')
+  }
+
+  async getOllamaModels() {
+    return this.request<{ models: string[] }>('/ollama/models')
+  }
+
+  async testOllama(model?: string) {
+    return this.request<{
+      success: boolean
+      model: string
+      response: string
+      duration: number
+      url: string
+      error?: string
+    }>('/ollama/test', {
+      method: 'POST',
+      body: JSON.stringify({ model }),
+    })
+  }
+
   // Metrics
   async getMetrics() {
     return this.request<any>('/metrics')

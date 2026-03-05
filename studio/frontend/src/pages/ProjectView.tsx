@@ -15,6 +15,13 @@ interface Project {
   currentPhase?: string
   progress?: number
   narrative?: string
+  phases?: any[]
+  stats?: {
+    duration: string
+    features: number
+    qaScore: number
+  }
+  projectUrl?: string
 }
 
 export function ProjectView() {
@@ -22,15 +29,6 @@ export function ProjectView() {
   const navigate = useNavigate()
   const [project, setProject] = useState<Project | null>(null)
   const [loading, setLoading] = useState(true)
-
-  const phases: any[] = [
-    { id: 'intake', name: 'Intake', color: 'blue', status: 'done' },
-    { id: 'plan', name: 'Planeamento', color: 'indigo', status: 'running' },
-    { id: 'build', name: 'Desenvolvimento', color: 'purple', status: 'pending' },
-    { id: 'qa', name: 'QA', color: 'cyan', status: 'pending' },
-    { id: 'fix', name: 'Correções', color: 'amber', status: 'pending' },
-    { id: 'deploy', name: 'Deploy', color: 'green', status: 'pending' },
-  ]
 
   useEffect(() => {
     if (!id) return
@@ -119,26 +117,25 @@ export function ProjectView() {
       </div>
 
       {/* Pipeline */}
-      <div className="border-b border-base-lighter bg-base-light/30">
-        <div className="max-w-[2000px] mx-auto">
-          <PipelineVisual projectId={project.id} phases={phases} />
+      {project.phases && project.phases.length > 0 && (
+        <div className="border-b border-base-lighter bg-base-light/30">
+          <div className="max-w-[2000px] mx-auto">
+            <PipelineVisual projectId={project.id} phases={project.phases} />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main content */}
       <div className="flex-1 overflow-hidden">
         <div className="h-full max-w-[2000px] mx-auto p-6">
-          {project.status === 'completed' ? (
+          {project.status === 'completed' && project.stats ? (
             /* Delivery Card */
             <div className="max-w-3xl mx-auto">
               <DeliveryCard
                 projectId={project.id}
                 projectName={project.name}
-                stats={{
-                  duration: '45 min',
-                  features: 12,
-                  qaScore: 95,
-                }}
+                projectUrl={project.projectUrl}
+                stats={project.stats}
                 onOpenProject={handleOpenProject}
                 onViewCode={() => {}}
                 onDownloadZip={handleDownloadZip}

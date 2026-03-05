@@ -325,4 +325,94 @@ vercel --prod
         }
         return vars.map(v => `- \`${v}\``).join('\n');
     }
+    /**
+     * Gerar plano técnico para uma Feature específica
+     */
+    async generateFeaturePlan(feature, acceptanceCriteria, projectArchitecture) {
+        const prompt = `És o Architect Agent do DevForge — especialista em planear features técnicas.
+
+**ARQUITECTURA DO PROJECTO:**
+${JSON.stringify(projectArchitecture, null, 2)}
+
+**FEATURE:**
+- **Título:** ${feature.title}
+- **Descrição:** ${feature.description}
+- **Tipo:** ${feature.type}
+- **Prioridade:** ${feature.priority}
+
+**ACCEPTANCE CRITERIA:**
+${acceptanceCriteria.map((c, i) => `${i + 1}. ${c}`).join('\n')}
+
+**TAREFA:**
+Gera um plano técnico detalhado para implementar esta feature, incluindo:
+
+1. **Alterações na Base de Dados** (se necessário):
+   - Novas tabelas
+   - Novos campos em tabelas existentes
+   - Novas relações
+   - Migrations necessárias
+
+2. **Ficheiros a Criar/Modificar:**
+   - Frontend (componentes, páginas, hooks)
+   - Backend (API routes, tRPC procedures)
+   - Types (TypeScript types/interfaces)
+   - Utils (helper functions)
+
+3. **Fluxo de Dados:**
+   - User Action → Frontend → API → Database → Response
+   - Validações necessárias
+   - Error handling
+
+4. **Testes QA:**
+   - Playwright tests necessários
+   - Validações de UI
+   - Validações de API
+
+5. **Regras Técnicas Específicas:**
+   - Regras que devem ser seguidas para esta feature
+   - Enforcement de segurança
+   - Performance considerations
+
+**FORMATO OUTPUT (JSON):**
+{
+  "databaseChanges": {
+    "newTables": [],
+    "modifiedTables": [],
+    "newRelations": [],
+    "migrations": []
+  },
+  "files": {
+    "create": [
+      { "path": "app/features/example/page.tsx", "purpose": "Feature page", "priority": "HIGH" }
+    ],
+    "modify": [
+      { "path": "lib/prisma.ts", "changes": "Add new model import", "priority": "MEDIUM" }
+    ]
+  },
+  "dataFlow": [
+    "1. User clicks button → triggers handleSubmit",
+    "2. Frontend validates with zod → calls API /api/features",
+    "3. API validates session → creates DB record",
+    "4. Returns success → redirects to /dashboard"
+  ],
+  "qaTests": [
+    { "type": "UI", "description": "Verify button is visible and clickable" },
+    { "type": "API", "description": "Test /api/features returns 200 with valid data" }
+  ],
+  "technicalRules": [
+    "MUST validate session before any DB operation",
+    "MUST use Prisma transactions for multi-table operations"
+  ]
+}
+
+Gera JSON puro (sem markdown).`;
+        const response = await client.messages.create({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 8000,
+            messages: [{ role: 'user', content: prompt }]
+        });
+        const text = response.content[0].type === 'text' ? response.content[0].text : '{}';
+        const plan = JSON.parse(text.replace(/```json\n?|\n?```/g, ''));
+        return plan;
+    }
 }

@@ -8,6 +8,9 @@ export class OllamaClient {
         this.baseUrl = baseUrl;
         this.timeout = timeout;
     }
+    /**
+     * Check if Ollama is running and accessible
+     */
     async checkHealth() {
         try {
             const controller = new AbortController();
@@ -27,6 +30,9 @@ export class OllamaClient {
             return false;
         }
     }
+    /**
+     * List all available models
+     */
     async listModels() {
         try {
             const controller = new AbortController();
@@ -44,6 +50,50 @@ export class OllamaClient {
         catch (error) {
             console.error('[Ollama] Failed to list models:', error);
             throw error;
+        }
+    }
+    /**
+     * Get detailed information about available models
+     */
+    async getModelsInfo() {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+            const response = await fetch(`${this.baseUrl}/api/tags`, {
+                signal: controller.signal,
+            });
+            clearTimeout(timeoutId);
+            if (!response.ok) {
+                throw new Error(`Failed to get models info: ${response.statusText}`);
+            }
+            const data = (await response.json());
+            return data.models;
+        }
+        catch (error) {
+            console.error('[Ollama] Failed to get models info:', error);
+            throw error;
+        }
+    }
+    /**
+     * Test connection with a quick generation
+     */
+    async testConnection(model = 'qwen2.5:14b') {
+        try {
+            const startTime = Date.now();
+            const response = await this.generate(model, 'Say "OK" if you can read this.', 'You are a test assistant. Respond with exactly "OK" and nothing else.', { temperature: 0, num_predict: 5 });
+            const duration = Date.now() - startTime;
+            return {
+                success: true,
+                duration,
+                response: response.trim(),
+            };
+        }
+        catch (error) {
+            return {
+                success: false,
+                duration: 0,
+                error: error instanceof Error ? error.message : 'Unknown error',
+            };
         }
     }
     async generate(model, prompt, systemPrompt, options) {

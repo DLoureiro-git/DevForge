@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import './styles/design-system.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -15,12 +18,6 @@
 
   * {
     @apply border-base-lighter;
-  }
-
-  body {
-    @apply bg-base text-white font-sans antialiased;
-    position: relative;
-    overflow-x: hidden;
   }
 
   /* Noise texture background */
@@ -50,53 +47,6 @@
   /* Glassmorphism card */
   .glass-card {
     @apply bg-base-light/50 backdrop-blur-xl border border-base-lighter rounded-xl;
-  }
-
-  /* Button base */
-  .btn {
-    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 inline-flex items-center gap-2;
-  }
-
-  .btn-primary {
-    @apply btn bg-accent-primary hover:bg-accent-primary/80 text-white;
-  }
-
-  .btn-secondary {
-    @apply btn bg-base-lighter hover:bg-base-lighter/80 text-white;
-  }
-
-  .btn-success {
-    @apply btn bg-accent-success hover:bg-accent-success/80 text-white;
-  }
-
-  .btn-ghost {
-    @apply btn hover:bg-base-lighter/50 text-white;
-  }
-
-  /* Input base */
-  .input {
-    @apply w-full px-4 py-2 bg-base-lighter border border-base-lighter rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-primary/50 transition-all;
-  }
-
-  /* Badge */
-  .badge {
-    @apply px-2 py-1 rounded-full text-xs font-medium;
-  }
-
-  .badge-pending {
-    @apply badge bg-gray-500/20 text-gray-400;
-  }
-
-  .badge-running {
-    @apply badge bg-accent-primary/20 text-accent-primary;
-  }
-
-  .badge-done {
-    @apply badge bg-accent-success/20 text-accent-success;
-  }
-
-  .badge-error {
-    @apply badge bg-accent-error/20 text-accent-error;
   }
 
   /* Terminal style */

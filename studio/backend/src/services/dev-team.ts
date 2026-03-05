@@ -289,6 +289,121 @@ export class DevTeam {
 
     return result
   }
+
+  /**
+   * Executar DevTeam para uma Feature específica
+   */
+  async executeFeature(request: {
+    feature: any
+    technicalPlan: any
+    architecture: any
+    projectPath: string
+  }): Promise<DevTeamResponse> {
+    const startTime = Date.now()
+
+    // Parse technical plan para criar assignments
+    const assignments: FileAssignment[] = []
+
+    // Ficheiros a criar
+    if (request.technicalPlan.files?.create) {
+      for (const file of request.technicalPlan.files.create) {
+        const devRole = this.inferDevRole(file.path)
+        assignments.push({
+          devRole,
+          filePath: file.path,
+          description: file.purpose || 'Feature file'
+        })
+      }
+    }
+
+    // Ficheiros a modificar
+    if (request.technicalPlan.files?.modify) {
+      for (const file of request.technicalPlan.files.modify) {
+        const devRole = this.inferDevRole(file.path)
+        assignments.push({
+          devRole,
+          filePath: file.path,
+          description: file.changes || 'Feature modification'
+        })
+      }
+    }
+
+    // Alterações DB
+    if (request.technicalPlan.databaseChanges?.newTables?.length > 0 ||
+        request.technicalPlan.databaseChanges?.modifiedTables?.length > 0) {
+      assignments.push({
+        devRole: 'database',
+        filePath: 'prisma/schema.prisma',
+        description: 'Database schema changes for feature'
+      })
+    }
+
+    console.log(`[DevTeam] Feature "${request.feature.title}": ${assignments.length} ficheiros`)
+    assignments.forEach(a => {
+      console.log(`  - ${a.devRole}: ${a.filePath}`)
+    })
+
+    // Criar context augmentado para devs
+    const featureContext = `
+FEATURE: ${request.feature.title}
+DESCRIPTION: ${request.feature.description}
+TYPE: ${request.feature.type}
+PRIORITY: ${request.feature.priority}
+
+TECHNICAL PLAN:
+${JSON.stringify(request.technicalPlan, null, 2)}
+
+PROJECT ARCHITECTURE:
+${JSON.stringify(request.architecture, null, 2)}
+`
+
+    // Gerar código em paralelo
+    const result = await this.generateAllCode(
+      {
+        architecture: featureContext,
+        technicalRules: [
+          ...request.architecture.technicalRules || [],
+          ...request.technicalPlan.technicalRules || []
+        ]
+      },
+      assignments
+    )
+
+    console.log(`[DevTeam] Feature concluída em ${(result.totalDuration / 1000).toFixed(2)}s`)
+    console.log(`  - Sucessos: ${result.stats.successful}`)
+    console.log(`  - Falhas: ${result.stats.failed}`)
+
+    return result
+  }
+
+  /**
+   * Inferir dev role a partir do file path
+   */
+  private inferDevRole(filePath: string): 'frontend' | 'backend' | 'database' | 'utils' {
+    if (filePath.includes('route.ts') || filePath.includes('/api/')) {
+      return 'backend'
+    }
+
+    if (filePath.includes('.prisma')) {
+      return 'database'
+    }
+
+    if (filePath.includes('page.tsx') || filePath.includes('component')) {
+      return 'frontend'
+    }
+
+    if (
+      filePath.includes('context') ||
+      filePath.includes('hook') ||
+      filePath.includes('util') ||
+      filePath.includes('lib/')
+    ) {
+      return 'utils'
+    }
+
+    // Default
+    return 'frontend'
+  }
 }
 
 // Singleton instance
