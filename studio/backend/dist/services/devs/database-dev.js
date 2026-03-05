@@ -3,6 +3,7 @@
  * Especializado em: Prisma Schema, Migrations, Relations, Indexes
  */
 import { ollama } from '../../lib/ollama';
+import { getModelForDev, getOllamaOptions, devLog } from './dev-config';
 const DATABASE_DEV_SYSTEM_PROMPT = `Você é um Database Engineer especializado em Prisma.
 
 Sua responsabilidade:
@@ -52,8 +53,8 @@ Se não houver mudanças ao schema, retorne "NO_CHANGES".
 NÃO incluir markdown code blocks (sem \`\`\`).`;
 export class DatabaseDev {
     model;
-    constructor(model = 'qwen2.5-coder:32b') {
-        this.model = model;
+    constructor(model) {
+        this.model = model || getModelForDev('database');
     }
     async generateCode(request) {
         const startTime = Date.now();
@@ -73,11 +74,9 @@ Descrição: ${request.fileDescription}
 Implemente o schema Prisma completo seguindo a arquitectura e regras técnicas.
 Se não houver mudanças necessárias, retorne "NO_CHANGES".
 Retorne APENAS o código, sem markdown code blocks, sem explicações.`;
+            devLog(`[Database] Gerando ${request.filePath}...`);
             // Gerar código
-            const rawCode = await ollama.generate(this.model, prompt, DATABASE_DEV_SYSTEM_PROMPT, {
-                temperature: 0.2,
-                top_p: 0.9
-            });
+            const rawCode = await ollama.generate(this.model, prompt, DATABASE_DEV_SYSTEM_PROMPT, getOllamaOptions());
             // Limpar markdown code blocks se existirem
             const code = ollama.removeMarkdownCodeBlocks(rawCode).trim();
             // Verificar se é NO_CHANGES

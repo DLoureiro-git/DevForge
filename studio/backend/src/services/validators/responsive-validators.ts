@@ -72,7 +72,7 @@ export async function checkHorizontalOverflow(
           title: `Overflow horizontal em ${breakpoint.name}`,
           description: `Página tem ${scrollWidth}px de largura mas viewport é ${clientWidth}px`,
           location: `${deployUrl} @ ${breakpoint.width}x${breakpoint.height}`,
-          screenshot: await page.screenshot({ fullPage: false }),
+          screenshot: (await page.screenshot({ fullPage: false })).toString("base64"),
           reproducible: true,
           foundAt: new Date(),
         });
@@ -204,7 +204,7 @@ export async function checkTouchTargets(
         title: `${smallTouchTargets.length}+ elementos interativos abaixo de ${MIN_TOUCH_TARGET}x${MIN_TOUCH_TARGET}px`,
         description: JSON.stringify(smallTouchTargets, null, 2),
         location: `${deployUrl} @ 375x667`,
-        screenshot: await page.screenshot({ fullPage: false }),
+        screenshot: (await page.screenshot({ fullPage: false })).toString("base64"),
         reproducible: true,
         foundAt: new Date(),
       });
@@ -284,7 +284,7 @@ export async function validateBreakpoints(
           title: `Página vazia em ${breakpoint.name}`,
           description: `Nenhum conteúdo visível em ${breakpoint.width}x${breakpoint.height}`,
           location: `${deployUrl} @ ${breakpoint.width}x${breakpoint.height}`,
-          screenshot: await page.screenshot({ fullPage: false }),
+          screenshot: (await page.screenshot({ fullPage: false })).toString("base64"),
           reproducible: true,
           foundAt: new Date(),
         });
@@ -417,7 +417,7 @@ export async function validateTextReadability(
         title: `${smallText.length}+ elementos com texto abaixo de ${MIN_MOBILE_FONT_SIZE}px em mobile`,
         description: JSON.stringify(smallText, null, 2),
         location: `${deployUrl} @ 375x667`,
-        screenshot: await page.screenshot({ fullPage: false }),
+        screenshot: (await page.screenshot({ fullPage: false })).toString("base64"),
         reproducible: true,
         foundAt: new Date(),
       });

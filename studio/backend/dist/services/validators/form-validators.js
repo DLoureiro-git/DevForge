@@ -100,7 +100,7 @@ export async function validateFormValidation(browser, projectPath, deployUrl) {
                         title: 'Validação client-side não funciona',
                         description: 'Formulário aceita submit sem preencher campos obrigatórios',
                         location: deployUrl,
-                        screenshot: await page.screenshot({ fullPage: false }),
+                        screenshot: (await page.screenshot({ fullPage: false })).toString("base64"),
                         reproducible: true,
                         foundAt: new Date(),
                     });
@@ -265,7 +265,7 @@ export async function validateServerErrorDisplay(browser, projectPath, deployUrl
                     title: 'Erros de servidor não são exibidos',
                     description: 'Utilizador não recebe feedback quando API falha',
                     location: deployUrl,
-                    screenshot: await page.screenshot({ fullPage: false }),
+                    screenshot: (await page.screenshot({ fullPage: false })).toString("base64"),
                     reproducible: true,
                     foundAt: new Date(),
                 });
@@ -283,7 +283,7 @@ export async function validateServerErrorDisplay(browser, projectPath, deployUrl
                     title: 'Stack trace exposto ao utilizador',
                     description: 'Informação sensível de debug visível em produção',
                     location: deployUrl,
-                    screenshot: await page.screenshot({ fullPage: false }),
+                    screenshot: (await page.screenshot({ fullPage: false })).toString("base64"),
                     reproducible: true,
                     foundAt: new Date(),
                 });
@@ -387,7 +387,7 @@ export async function validateFormLoadingStates(browser, projectPath, deployUrl)
                     title: 'Formulário sem loading state durante submissão',
                     description: 'Utilizador não tem feedback visual de que submissão está em progresso',
                     location: deployUrl,
-                    screenshot: await page.screenshot({ fullPage: false }),
+                    screenshot: (await page.screenshot({ fullPage: false })).toString("base64"),
                     reproducible: true,
                     foundAt: new Date(),
                 });

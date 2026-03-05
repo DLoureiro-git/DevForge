@@ -76,7 +76,7 @@ export async function validateRouteProtection(
                 title: `Rota protegida ${route} acessível sem autenticação`,
                 description: `${fullUrl} deve redirecionar para login mas está acessível`,
                 location: fullUrl,
-                screenshot: await page.screenshot({ fullPage: false }),
+                screenshot: (await page.screenshot({ fullPage: false })).toString("base64"),
                 reproducible: true,
                 foundAt: new Date(),
               });
@@ -253,7 +253,7 @@ export async function validatePasswordSecurity(
               title: 'Password fraca aceite',
               description: `Password "${weakPass}" não foi rejeitada`,
               location: signupPage,
-              screenshot: await page.screenshot({ fullPage: false }),
+              screenshot: (await page.screenshot({ fullPage: false })).toString("base64"),
               reproducible: true,
               foundAt: new Date(),
             });

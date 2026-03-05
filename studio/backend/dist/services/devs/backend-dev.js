@@ -3,6 +3,7 @@
  * Especializado em: Next.js API Routes, Prisma, Validações, Security
  */
 import { ollama } from '../../lib/ollama';
+import { getModelForDev, getOllamaOptions, devLog } from './dev-config';
 const BACKEND_DEV_SYSTEM_PROMPT = `Você é um Backend Developer especializado em Next.js API Routes + Prisma.
 
 Sua responsabilidade:
@@ -48,8 +49,8 @@ Inclua imports, exports, e código completo pronto para usar.
 NÃO incluir markdown code blocks (sem \`\`\`).`;
 export class BackendDev {
     model;
-    constructor(model = 'qwen2.5-coder:32b') {
-        this.model = model;
+    constructor(model) {
+        this.model = model || getModelForDev('backend');
     }
     async generateCode(request) {
         const startTime = Date.now();
@@ -68,11 +69,9 @@ Descrição: ${request.fileDescription}
 
 Implemente o código completo para este ficheiro seguindo a arquitectura e regras técnicas.
 Retorne APENAS o código, sem markdown code blocks, sem explicações.`;
+            devLog(`[Backend] Gerando ${request.filePath}...`);
             // Gerar código
-            const rawCode = await ollama.generate(this.model, prompt, BACKEND_DEV_SYSTEM_PROMPT, {
-                temperature: 0.2,
-                top_p: 0.9
-            });
+            const rawCode = await ollama.generate(this.model, prompt, BACKEND_DEV_SYSTEM_PROMPT, getOllamaOptions());
             // Limpar markdown code blocks se existirem
             const code = ollama.removeMarkdownCodeBlocks(rawCode).trim();
             return {

@@ -65,7 +65,7 @@ export async function validateDeploy(
         title: `Deploy retorna ${response.status()}`,
         description: `Erro de servidor ao acessar ${deployUrl}`,
         location: deployUrl,
-        screenshot: await page.screenshot({ fullPage: false }),
+        screenshot: (await page.screenshot({ fullPage: false })).toString("base64"),
         reproducible: true,
         foundAt: new Date(),
       });
@@ -92,7 +92,7 @@ export async function validateDeploy(
         title: 'Deploy retorna página vazia',
         description: 'O body da página está vazio',
         location: deployUrl,
-        screenshot: await page.screenshot({ fullPage: false }),
+        screenshot: (await page.screenshot({ fullPage: false })).toString("base64"),
         reproducible: true,
         foundAt: new Date(),
       });

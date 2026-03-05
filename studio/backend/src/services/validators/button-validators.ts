@@ -106,7 +106,7 @@ export async function validateAllButtons(
         title: `${brokenButtons.length} botões sem handler`,
         description: JSON.stringify(brokenButtons.slice(0, 5), null, 2),
         location: deployUrl,
-        screenshot: await page.screenshot({ fullPage: false }),
+        screenshot: (await page.screenshot({ fullPage: false })).toString("base64"),
         reproducible: true,
         foundAt: new Date(),
       });
@@ -407,7 +407,7 @@ export async function validateDisabledStates(
         title: `${clickableDisabled.length} botões disabled clicáveis`,
         description: `Botões disabled mas com cursor pointer: ${clickableDisabled.join(', ')}`,
         location: deployUrl,
-        screenshot: await page.screenshot({ fullPage: false }),
+        screenshot: (await page.screenshot({ fullPage: false })).toString("base64"),
         reproducible: true,
         foundAt: new Date(),
       });
