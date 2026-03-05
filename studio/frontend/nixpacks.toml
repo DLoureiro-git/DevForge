@@ -1,5 +1,5 @@
-[phases.build]
-cmds = ["npm install", "VITE_API_URL=$VITE_API_URL npm run build -- --mode production"]
+[phases.install]
+cmds = ["npm install --production=false serve"]
 
 [start]
 cmd = "npx serve -s dist -l $PORT"
