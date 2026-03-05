@@ -59,7 +59,15 @@ const metrics_js_1 = __importDefault(require("./routes/metrics.js"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5680;
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5679';
+// CORS: Allow multiple frontends
+const ALLOWED_ORIGINS = [
+    'http://localhost:5679',
+    'http://localhost:3000',
+    'https://perceptive-possibility-production-f87c.up.railway.app',
+    'https://frontend-one-xi-61.vercel.app',
+    'https://frontend-f874792kt-dloureiros-projects.vercel.app',
+    process.env.FRONTEND_URL,
+].filter(Boolean);
 // Security: Helmet
 app.use((0, helmet_1.default)({
     contentSecurityPolicy: {
@@ -88,9 +96,20 @@ const authLimiter = (0, express_rate_limit_1.default)({
 // Apply rate limiting to all API routes
 app.use('/api/', limiter);
 app.use('/api/auth/', authLimiter);
-// Middleware
+// Middleware: CORS
 app.use((0, cors_1.default)({
-    origin: FRONTEND_URL,
+    origin: (origin, callback) => {
+        // Permitir requests sem origin (mobile apps, curl, etc)
+        if (!origin)
+            return callback(null, true);
+        if (ALLOWED_ORIGINS.includes(origin)) {
+            callback(null, true);
+        }
+        else {
+            console.warn(`[CORS] Blocked origin: ${origin}`);
+            callback(new Error(`Origin ${origin} not allowed by CORS`));
+        }
+    },
     credentials: true,
 }));
 app.use(express_1.default.json({ limit: '10mb' }));
@@ -148,7 +167,7 @@ async function startup() {
         // Start server
         const server = app.listen(PORT, () => {
             console.log(`[DevForge] Server running on http://localhost:${PORT}`);
-            console.log(`[DevForge] Frontend: ${FRONTEND_URL}`);
+            console.log(`[DevForge] Allowed origins: ${ALLOWED_ORIGINS.join(', ')}`);
         });
         // Initialize WebSocket server
         const { initWebSocketServer } = await Promise.resolve().then(() => __importStar(require('./lib/websocket.js')));
