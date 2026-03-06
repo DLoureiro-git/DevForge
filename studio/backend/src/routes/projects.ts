@@ -22,8 +22,8 @@ router.post('/', extractUser, async (req: AuthRequest, res, next) => {
   try {
     const { name, description } = req.body;
 
-    if (!name || !description) {
-      throw new AppError('Name and description are required', 400);
+    if (!name) {
+      throw new AppError('Project name is required', 400);
     }
 
     // Se não houver user, criar/usar demo user

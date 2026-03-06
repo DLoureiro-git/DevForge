@@ -23,8 +23,8 @@ function getParamId(param) {
 router.post('/', auth_js_1.extractUser, async (req, res, next) => {
     try {
         const { name, description } = req.body;
-        if (!name || !description) {
-            throw new error_js_1.AppError('Name and description are required', 400);
+        if (!name) {
+            throw new error_js_1.AppError('Project name is required', 400);
         }
         // Se não houver user, criar/usar demo user
         let userId = req.user?.id;
