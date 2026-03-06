@@ -23,7 +23,7 @@ model Project {
   userId       String
   user         User          @relation(fields: [userId], references: [id])
   name         String
-  description  String // prompt original do utilizador
+  description  String? // prompt original do utilizador (opcional)
   status       ProjectStatus @default(INTAKE)
   prd          Json? // Product Requirements Document gerado pelo PM Agent
   architecture Json? // Decisões de arquitectura do Architect Agent
