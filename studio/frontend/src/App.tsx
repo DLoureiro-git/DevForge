@@ -28,11 +28,6 @@ function App() {
     )
   }
 
-  // Usar novo design
-  return <DevForgeNew />
-
-  // Design antigo (comentado para referência)
-  /*
   return (
     <ErrorBoundary>
       <BrowserRouter>
@@ -45,7 +40,6 @@ function App() {
       </BrowserRouter>
     </ErrorBoundary>
   )
-  */
 }
 
 export default App
